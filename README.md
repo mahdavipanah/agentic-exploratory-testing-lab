@@ -32,7 +32,7 @@ Charters use Elisabeth Hendrickson's template, *Explore (target) with (resources
 
 ## Results so far
 
-**Pilot, 9 Nov 2026:** one run per arm, with Claude Opus 5.5. The answer key has 38 known problems. The pilot was exploratory: its sessions ran as agents inside a Claude session, isolated by instruction only. The statistics we report will come from the isolated batch (fresh isolation, 5 runs per arm).
+**Pilot, 9 Nov 2026:** one run per arm, with Claude Opus 5.5. The answer key has 38 known problems. The pilot was exploratory: its sessions ran as agents inside a Claude session, isolated by instruction only. The statistics we report will come from the isolated batch: 5 runs per arm, each in its own isolated session.
 
 | Arm | Known problems reported | Noticed, incl. "questions" | False positives | Requests |
 | --- | --- | --- | --- | --- |
@@ -92,28 +92,24 @@ scripts/run-batch.sh smoke 1 dry && rm -rf results/smoke
 
 This runs arms A to D in parallel, with a stand-in agent that sends one request. If it passes, ports, prompts and result folders all work.
 
-### 3. Run a batch
+### 3. Run the experiment
 
-Create a subscription token once, and keep it in your terminal. It's a secret, like a password.
-
-```bash
-claude setup-token
-export CLAUDE_CODE_OAUTH_TOKEN=...
-```
-
-First, run one real session to check your setup (about 5 minutes):
+One command, using your normal Claude Code login. No token or API key is needed:
 
 ```bash
-scripts/run-arm.sh A 0 claude 3001 smoke && cat results/smoke/A-run0-claude/meta.txt
+scripts/run-experiment.sh batch-1
 ```
 
-Expect `agent_exit=0`, `isolation=fresh` and `fresh_home_memory_files=0`, plus a `report.md` with findings. Then run the batch:
+It works through these steps:
 
-```bash
-AET_MODEL=claude-opus-5-5 scripts/run-batch.sh batch-1 5 claude "A B C D M"
-```
+1. Checks the prerequisites.
+2. Sets up the target.
+3. Verifies the answer key.
+4. Runs one real test session, and stops if that session fails, writes no findings or touches memory files.
+5. Runs the batch.
+6. Prints a summary and the `git` command to share the results.
 
-That's 25 sessions: 5 runs of each exploring arm A to D, plus 5 of the memory check M. They run in a shuffled order, 4 at a time. A pilot session used about 100k to 120k tokens and 5 minutes, so expect around 2 million tokens and roughly 40 minutes. Subscription usage limits may slow it down.
+The batch is 5 runs of each exploring arm A to D, plus 5 of the memory check M: 25 sessions in a shuffled order, 4 at a time. A pilot session used about 100k to 120k tokens and 5 minutes, so expect around 2 million tokens and roughly 40 minutes. Subscription usage limits may slow it down. Don't use Claude Code yourself while it runs.
 
 To add more runs to the same batch later:
 
@@ -123,17 +119,23 @@ AET_RUN_START=6 scripts/run-batch.sh batch-1 3 claude "A B C D M"
 
 **Why 5 runs per arm:** with 3 runs each, even a perfect gap between two arms can't reach p < 0.05; the smallest possible p is 0.1. With 5 runs each, the floor is 0.008.
 
-**How runs are kept apart.** By default, every session runs in **fresh isolation**:
+**What every session gets, in any mode:**
 
-- It gets a brand-new, empty Claude Code home (`CLAUDE_CONFIG_DIR`), deleted when the session ends. The names of the files it wrote are kept in `fresh-home-files.txt` as an audit.
-- Auto-memory is switched off (`CLAUDE_CODE_DISABLE_AUTO_MEMORY=1`), and Claude Code runs in `--safe-mode`, so none of your CLAUDE.md, skills, hooks or plugins apply.
-- It starts with a clean environment, with nothing inherited from a parent Claude Code session.
-- It reads settings only from an empty folder.
-- It gets a fresh target on its own port.
-- It gets a temporary directory holding only the prompt and `api.md`.
-- It may only use `curl`, read `api.md`, and write `report.md`.
+- A clean environment, with nothing inherited from a parent Claude Code session.
+- Claude Code in `--safe-mode`, so none of your CLAUDE.md, skills, hooks, plugins or MCP servers apply.
+- Settings read only from an empty folder.
+- No saved session.
+- A fresh target on its own port.
+- A temporary directory holding only the prompt and `api.md`.
+- Permission only to use `curl`, read `api.md`, and write `report.md`.
 
-Alternatives: `AET_ISOLATION=bare` uses `claude --bare` and needs `ANTHROPIC_API_KEY`. `AET_ISOLATION=safe` uses your normal Claude Code home; those runs are left out of the statistics.
+**How runs are kept apart.** That depends on how Claude Code logs in:
+
+| Mode | Used when | What it adds |
+| --- | --- | --- |
+| `login` | Default without a token or key | Your normal login. Auto-memory switched off (`CLAUDE_CODE_DISABLE_AUTO_MEMORY=1`), and your Claude Code home audited before and after every run: memory files that appear or change are counted in `meta.txt` (expected: 0). |
+| `fresh` | Default when `CLAUDE_CODE_OAUTH_TOKEN` (from `claude setup-token`) or `ANTHROPIC_API_KEY` is set | A brand-new, empty Claude Code home for every run, deleted afterwards, with auto-memory off. Nothing at all is shared between runs. |
+| `bare` | `AET_ISOLATION=bare` plus `ANTHROPIC_API_KEY` | `claude --bare`: no CLAUDE.md, auto-memory, hooks, plugins or keychain. |
 
 **Carry-over check.** Because the order is shuffled, `score.py` can test whether sessions that ran later did better than their arm's average. If runs leaked into each other, later ones would score higher. The schedule and its seed are in `results/<batch>/schedule.txt`.
 
@@ -142,7 +144,7 @@ Each session leaves its files in `results/<batch>/<arm>-run<n>-claude/`:
 - `prompt.md`
 - `transcript.jsonl`
 - `report.md`
-- `meta.txt`: versions, isolation mode, run order, exit status, curl calls counted from the transcript, turns and cost.
+- `meta.txt`: versions, isolation mode, run order, exit status, memory audit, curl calls counted from the transcript, turns and cost.
 
 **Arm M** gets the docs but no access to the API, and is asked to predict the bugs. If it predicts many of the 38, part of what the other arms "find" is the model remembering Restful-booker, not exploring it.
 

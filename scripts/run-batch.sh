@@ -2,9 +2,9 @@
 # Run a whole batch: every arm, N runs each, in a shuffled order.
 #
 # Usage: scripts/run-batch.sh <label> [runs=5] [agent=claude] [arms="A B C D"]
-# Example (subscription, default fresh isolation):
-#   export CLAUDE_CODE_OAUTH_TOKEN=...      # once: claude setup-token
+# Example (your normal Claude Code login, no token: login isolation):
 #   AET_MODEL=claude-opus-5-5 scripts/run-batch.sh batch-1 5 claude "A B C D M"
+# With CLAUDE_CODE_OAUTH_TOKEN or ANTHROPIC_API_KEY exported, runs use fresh isolation instead.
 #
 # All (arm, run) sessions are shuffled into one schedule, then run in waves of AET_PARALLEL
 # (default 4) sessions at a time, each on its own port. Shuffling separates "when a session ran"
@@ -27,17 +27,25 @@ SEED="${AET_SEED:-$RANDOM$RANDOM}"
 
 [ -f "$ROOT/target/api.md" ] || "$ROOT/scripts/setup-target.sh"
 
+ISOLATION="n/a"
 if [ "$AGENT" = "claude" ]; then
-  case "${AET_ISOLATION:-fresh}" in
+  if [ -n "${AET_ISOLATION:-}" ]; then ISOLATION="$AET_ISOLATION"
+  elif [ -n "${CLAUDE_CODE_OAUTH_TOKEN:-}" ] || [ -n "${ANTHROPIC_API_KEY:-}" ]; then ISOLATION="fresh"
+  else ISOLATION="login"; fi
+  case "$ISOLATION" in
     fresh) if [ -z "${CLAUDE_CODE_OAUTH_TOKEN:-}" ] && [ -z "${ANTHROPIC_API_KEY:-}" ]; then
-             echo "Fresh isolation needs CLAUDE_CODE_OAUTH_TOKEN (create it once with 'claude setup-token')" >&2
-             echo "or ANTHROPIC_API_KEY, because every run starts with an empty Claude Code home." >&2
+             echo "Fresh isolation needs CLAUDE_CODE_OAUTH_TOKEN or ANTHROPIC_API_KEY; or use AET_ISOLATION=login." >&2
              exit 2
            fi ;;
     bare)  if [ -z "${ANTHROPIC_API_KEY:-}" ]; then
              echo "Bare isolation needs ANTHROPIC_API_KEY." >&2; exit 2
            fi ;;
+    login|safe) ;;
+    *) echo "AET_ISOLATION must be fresh, login or bare" >&2; exit 2 ;;
   esac
+  if [ "$ISOLATION" = "login" ] || [ "$ISOLATION" = "safe" ]; then
+    echo "Using your normal Claude Code login (login isolation). Please don't use Claude Code yourself until the batch ends."
+  fi
 fi
 
 mkdir -p "$ROOT/results/$LABEL"
@@ -47,7 +55,7 @@ OFFSET=0
 [ -f "$SCHEDULE" ] && OFFSET=$(grep -c '^[0-9]' "$SCHEDULE" || true)
 [ -f "$SCHEDULE" ] || printf '# order arm run port wave started_utc\n' > "$SCHEDULE"
 printf '# seed=%s runs=%s-%s arms=%s agent=%s isolation=%s parallel=%s\n' \
-  "$SEED" "$START" "$((START + RUNS - 1))" "$ARMS" "$AGENT" "$([ "$AGENT" = claude ] && echo "${AET_ISOLATION:-fresh}" || echo n/a)" "$PARALLEL" >> "$SCHEDULE"
+  "$SEED" "$START" "$((START + RUNS - 1))" "$ARMS" "$AGENT" "$ISOLATION" "$PARALLEL" >> "$SCHEDULE"
 
 # Build and shuffle the job list with a recorded seed (portable: no shuf on macOS).
 JOBS=$(python3 -I - "$SEED" "$START" "$RUNS" $ARMS <<'EOF'

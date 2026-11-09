@@ -9,18 +9,20 @@
 #   label: results folder name, default "runs-<date>"
 #
 # Environment:
-#   AET_ISOLATION      claude only: "fresh" (default), "bare" or "safe"
-#                      fresh: claude --safe-mode with a brand-new, empty Claude Code home (CLAUDE_CONFIG_DIR)
-#                             that is deleted after the run, and auto-memory switched off
-#                             (CLAUDE_CODE_DISABLE_AUTO_MEMORY=1). Nothing is shared between runs.
-#                             Authenticates with CLAUDE_CODE_OAUTH_TOKEN (create it once with
-#                             `claude setup-token`; uses your subscription) or ANTHROPIC_API_KEY.
-#                      bare:  claude --bare. No CLAUDE.md, auto-memory, hooks, plugins, LSP or keychain;
-#                             authenticates only with ANTHROPIC_API_KEY.
-#                      safe:  claude --safe-mode with your normal Claude Code home and login. Auto-memory is
-#                             not explicitly off; runs are marked isolation=safe and left out of statistics.
-#   CLAUDE_CODE_OAUTH_TOKEN  subscription token for fresh mode
-#   ANTHROPIC_API_KEY        API key for bare mode (fresh mode accepts it too)
+#   AET_ISOLATION      claude only: "fresh", "login" or "bare". Default: fresh when CLAUDE_CODE_OAUTH_TOKEN or
+#                      ANTHROPIC_API_KEY is set, otherwise login.
+#                      fresh: --safe-mode with a brand-new, empty Claude Code home (CLAUDE_CONFIG_DIR), deleted
+#                             after the run, and auto-memory off (CLAUDE_CODE_DISABLE_AUTO_MEMORY=1). Nothing is
+#                             shared between runs. Needs CLAUDE_CODE_OAUTH_TOKEN (`claude setup-token`) or
+#                             ANTHROPIC_API_KEY, because the empty home has no login.
+#                      login: --safe-mode with your normal Claude Code login (no token needed), auto-memory off
+#                             (CLAUDE_CODE_DISABLE_AUTO_MEMORY=1) and no session saved. The home is shared, so
+#                             every run audits it: memory files new or changed during the run are counted in
+#                             meta.txt (expected 0). Don't use Claude Code yourself while a batch runs.
+#                      bare:  claude --bare (no CLAUDE.md, auto-memory, hooks, plugins, LSP or keychain);
+#                             needs ANTHROPIC_API_KEY.
+#   CLAUDE_CODE_OAUTH_TOKEN  subscription token for fresh mode (optional)
+#   ANTHROPIC_API_KEY        API key for bare or fresh mode (optional)
 #   AET_ORDER          set by run-batch.sh: this session's position in the shuffled schedule
 #   AET_MODEL          model to pass to the agent CLI (claude/codex), e.g. "claude-opus-5-5"
 #   AET_MAX_TURNS      claude only, default 150
@@ -40,25 +42,31 @@ ISOLATION="n/a"
 
 CONFIG_HOME=""
 if [ "$AGENT" = "claude" ]; then
-  ISOLATION="${AET_ISOLATION:-fresh}"
+  if [ -n "${AET_ISOLATION:-}" ]; then
+    ISOLATION="$AET_ISOLATION"
+  elif [ -n "${CLAUDE_CODE_OAUTH_TOKEN:-}" ] || [ -n "${ANTHROPIC_API_KEY:-}" ]; then
+    ISOLATION="fresh"
+  else
+    ISOLATION="login"
+  fi
+  [ "$ISOLATION" = "safe" ] && ISOLATION="login"   # older name
   case "$ISOLATION" in
     fresh)
       if [ -z "${CLAUDE_CODE_OAUTH_TOKEN:-}" ] && [ -z "${ANTHROPIC_API_KEY:-}" ]; then
         echo "Fresh isolation starts each run with an empty Claude Code home, so it has no saved login." >&2
-        echo "Create a token once with 'claude setup-token' (uses your subscription) and export it as" >&2
-        echo "CLAUDE_CODE_OAUTH_TOKEN, or export ANTHROPIC_API_KEY." >&2
+        echo "Export CLAUDE_CODE_OAUTH_TOKEN (from 'claude setup-token') or ANTHROPIC_API_KEY," >&2
+        echo "or use AET_ISOLATION=login to run with your normal Claude Code login." >&2
         exit 2
       fi
       ISO_FLAG="--safe-mode" ;;
+    login) ISO_FLAG="--safe-mode" ;;
     bare)
       if [ -z "${ANTHROPIC_API_KEY:-}" ]; then
         echo "Bare isolation needs ANTHROPIC_API_KEY: claude --bare does not use a subscription login." >&2
-        echo "Use the default AET_ISOLATION=fresh with a subscription token instead." >&2
         exit 2
       fi
       ISO_FLAG="--bare" ;;
-    safe) ISO_FLAG="--safe-mode" ;;
-    *) echo "AET_ISOLATION must be fresh, bare or safe, not '$ISOLATION'" >&2; exit 2 ;;
+    *) echo "AET_ISOLATION must be fresh, login or bare, not '$ISOLATION'" >&2; exit 2 ;;
   esac
 fi
 
@@ -80,7 +88,7 @@ if [ "$ISOLATION" = "fresh" ]; then
 fi
 
 # Always stop the target and remove the temp dirs, even if the agent fails.
-trap '"$ROOT/scripts/start-target.sh" stop "$PORT" >/dev/null 2>&1 || true; rm -rf "$RUN_DIR"; [ -z "$CONFIG_HOME" ] || rm -rf "$CONFIG_HOME"' EXIT
+trap '"$ROOT/scripts/start-target.sh" stop "$PORT" >/dev/null 2>&1 || true; rm -rf "$RUN_DIR" "$RUN_DIR".home-*.json; [ -z "$CONFIG_HOME" ] || rm -rf "$CONFIG_HOME"' EXIT
 
 [ "$ARM" = "M" ] || "$ROOT/scripts/start-target.sh" "$PORT"
 cp "$ROOT/target/api.md" "$RUN_DIR/api.md"
@@ -93,11 +101,17 @@ AGENT_VERSION="n/a"
 CLEAN_ENV=(env -i "HOME=$HOME" "PATH=$PATH" "LANG=${LANG:-en_US.UTF-8}" "TERM=${TERM:-dumb}" "TMPDIR=${TMPDIR:-/tmp}")
 for var in USER ANTHROPIC_API_KEY ANTHROPIC_BASE_URL CLAUDE_CODE_OAUTH_TOKEN HTTPS_PROXY HTTP_PROXY NO_PROXY \
            https_proxy http_proxy no_proxy NODE_EXTRA_CA_CERTS SSL_CERT_FILE OPENAI_API_KEY GEMINI_API_KEY GOOGLE_API_KEY; do
-  if [ -n "${!var:-}" ]; then CLEAN_ENV+=("$var=${!var}"); fi
+  val="$(printenv "$var" || true)"
+  if [ -n "$val" ]; then CLEAN_ENV+=("$var=$val"); fi
 done
-if [ "$ISOLATION" = "fresh" ]; then
-  CLEAN_ENV+=("CLAUDE_CONFIG_DIR=$CONFIG_HOME" "CLAUDE_CODE_DISABLE_AUTO_MEMORY=1")
-fi
+case "$ISOLATION" in
+  fresh) CLEAN_ENV+=("CLAUDE_CONFIG_DIR=$CONFIG_HOME" "CLAUDE_CODE_DISABLE_AUTO_MEMORY=1") ;;
+  login) CLEAN_ENV+=("CLAUDE_CODE_DISABLE_AUTO_MEMORY=1")
+         val="$(printenv CLAUDE_CONFIG_DIR || true)"
+         if [ -n "$val" ]; then CLEAN_ENV+=("CLAUDE_CONFIG_DIR=$val"); fi
+         LOGIN_HOME="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
+         python3 -I "$ROOT/scripts/home_audit.py" snapshot "$LOGIN_HOME" "$RUN_DIR.home-before.json" ;;
+esac
 
 cd "$RUN_DIR"
 set +e   # record a failing agent instead of aborting
@@ -145,6 +159,12 @@ set -e
 
 END=$(date +%s)
 cp "$RUN_DIR/report.md" "$OUT/report.md" 2>/dev/null || echo "No report.md written" > "$OUT/report.md"
+# Login isolation: which memory files in your Claude Code home appeared or changed during the run (expected none).
+if [ "$ISOLATION" = "login" ]; then
+  python3 -I "$ROOT/scripts/home_audit.py" snapshot "$LOGIN_HOME" "$RUN_DIR.home-after.json"
+  python3 -I "$ROOT/scripts/home_audit.py" diff "$RUN_DIR.home-before.json" "$RUN_DIR.home-after.json" > "$OUT/login-home-memory-changes.txt"
+  rm -f "$RUN_DIR.home-before.json" "$RUN_DIR.home-after.json"
+fi
 # Audit the fresh home before it is deleted: file names only, never contents (it may hold account data).
 if [ -n "$CONFIG_HOME" ]; then
   (cd "$CONFIG_HOME" && find . -type f | sed 's|^\./||' | sort) > "$OUT/fresh-home-files.txt"
@@ -153,6 +173,9 @@ fi
   printf 'arm=%s\nrun=%s\nagent=%s\nagent_version=%s\nisolation=%s\nmodel=%s\nport=%s\nseconds=%s\n' \
     "$ARM" "$RUN" "$AGENT" "$AGENT_VERSION" "$ISOLATION" "${MODEL:-cli default}" "$PORT" "$((END-START))"
   printf 'agent_exit=%s\ntarget_commit=%s\norder=%s\n' "$AGENT_EXIT" "$(git -C "$ROOT/target/restful-booker" rev-parse --short HEAD 2>/dev/null || echo unknown)" "${AET_ORDER:-n/a}"
+  if [ "$ISOLATION" = "login" ]; then
+    printf 'auto_memory=disabled\nlogin_home_memory_changes=%s\n' "$(grep -c . "$OUT/login-home-memory-changes.txt" || true)"
+  fi
   if [ -n "$CONFIG_HOME" ]; then
     printf 'auto_memory=disabled\nfresh_home_files=%s\nfresh_home_memory_files=%s\n' \
       "$(wc -l < "$OUT/fresh-home-files.txt" | tr -d ' ')" "$(grep -c -i 'memory' "$OUT/fresh-home-files.txt" || true)"
@@ -160,6 +183,10 @@ fi
   [ -f "$OUT/transcript.jsonl" ] && python3 -I "$ROOT/scripts/transcript_stats.py" "$OUT/transcript.jsonl"
 } > "$OUT/meta.txt"
 [ "$AGENT_EXIT" -eq 0 ] || echo "warning: $AGENT exited with status $AGENT_EXIT; see $OUT" >&2
+if [ "$ISOLATION" = "login" ] && grep -q . "$OUT/login-home-memory-changes.txt"; then
+  echo "warning: memory files in your Claude Code home changed during this run (see $OUT/login-home-memory-changes.txt)." >&2
+  echo "         If you used Claude Code yourself meanwhile, that may be the cause." >&2
+fi
 if [ -n "$CONFIG_HOME" ] && grep -q -i 'memory' "$OUT/fresh-home-files.txt"; then
   echo "warning: memory files appeared in the fresh home despite CLAUDE_CODE_DISABLE_AUTO_MEMORY=1 (deleted now; see $OUT/fresh-home-files.txt)" >&2
 fi

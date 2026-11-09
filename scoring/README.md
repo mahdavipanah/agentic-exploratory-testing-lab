@@ -43,7 +43,9 @@ Start the sheet with `python3 -I scripts/extract-findings.py results/<batch> > s
 
 ## Which runs count
 
-Statistics rest on **isolated runs only**: `isolation=fresh` (the default) or `isolation=bare` in `meta.txt`. `extract-findings.py` skips everything else unless you pass `--all`. That excludes the pilot, which ran as agents isolated by instruction, and safe-mode runs, which used your normal Claude Code home.
+Statistics rest on **isolated runs only**: `isolation=login`, `fresh` or `bare` in `meta.txt`. `extract-findings.py` skips everything else unless you pass `--all`. That excludes the pilot, which ran as agents isolated by instruction.
+
+Check the memory audit before trusting a batch. `login_home_memory_changes` and `fresh_home_memory_files` should be 0 in every session's `meta.txt`, and `run-experiment.sh` prints a count. A login-mode session with changes may only mean you used Claude Code yourself during the batch. Look at its `login-home-memory-changes.txt`, and rerun it if in doubt.
 
 ## Statistics
 
