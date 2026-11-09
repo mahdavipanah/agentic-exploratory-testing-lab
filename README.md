@@ -1,53 +1,91 @@
 # Agentic Exploratory Testing Lab
 
-Experiments for the essay *Teaching Agents to Explore* and for an exploratory-testing skill for Claude and other coding agents.
+Experiments behind the essay *Teaching Agents to Explore* (link coming soon) and the exploratory-testing skill for Claude and other coding agents that grows out of it.
 
 **The question:** can a coding agent explore software well on its own if you give it a written mission, and can it write that mission itself?
 
+> **Spoiler warning.** The target is [Restful-booker](https://github.com/mwinteringham/restful-booker), a practice API with deliberate bugs. If you want to hunt them yourself first, don't open `scoring/answer-key.md` or the reports in `results/`.
+
 ## The experiment
 
-One target, three arms. Each arm differs only in the mission it gives the agent:
+One target, three arms. The arms differ only in the mission the agent gets:
 
-| Arm | Mission | File |
+| Arm | Mission | Prompt |
 | --- | --- | --- |
-| A | None: "Find bugs in this API." | `arms/A-baseline.md` |
-| B | Four charters written by a human from the docs, each with a tour | `arms/B-human-charters.md` |
-| C | The agent lists risks and writes its own charters, then explores them | `arms/C-agent-charters.md` |
+| A | None: "Find bugs in this API." | [`arms/A-baseline.md`](arms/A-baseline.md) |
+| B | Four charters written by the experimenter from the docs, each with a tour | [`arms/B-human-charters.md`](arms/B-human-charters.md) |
+| C | The agent lists risks, writes its own charters, then explores them | [`arms/C-agent-charters.md`](arms/C-agent-charters.md) |
 
-These stay the same in every arm (`arms/shared-rules.md`): black box (curl and the API docs only), a budget of 80 HTTP requests, the evidence rule (only report what you saw and reproduced), the report format, and a freshly restarted target.
+The rest is the same in every arm ([`arms/shared-rules.md`](arms/shared-rules.md)):
 
-**Target:** [Restful-booker](https://github.com/mwinteringham/restful-booker), a deliberately buggy practice API by Mark Winteringham, pinned to commit `619d031`. It has no public answer key, so we build one (see `scoring/README.md`).
+- Black box: `curl` and the API docs only.
+- A budget of 80 HTTP requests.
+- An evidence rule: only report what you saw and reproduced.
+- A fixed report format.
+- A freshly restarted target.
 
-## Run it
+Charters use Elisabeth Hendrickson's template, *Explore (target) with (resources) to discover (information)*. Tours come from James Whittaker's *Exploratory Software Testing* ([`arms/tours.md`](arms/tours.md)).
 
-Requires Node 20+, Python 3 and an agent CLI (`claude` is the tested one).
+## Results so far
+
+**Pilot, 9 Nov 2026:** one run per arm, with Claude Opus 5.5. The answer key has 38 known problems.
+
+| Arm | Known problems reported | Noticed, incl. "questions" | False positives | Requests |
+| --- | --- | --- | --- | --- |
+| A, no mission | 9 (24%) | 12 (32%) | 0 | 62 of 80 |
+| B, experimenter's charters | 18 (47%) | 26 (68%) | 0 | 80 of 80 |
+| C, agent's own charters | 20 (53%) | 27 (71%) | 0 | 80 of 80 |
+
+- **A written mission roughly doubled the find rate,** and agent-written missions did as well as the experimenter's. With one run per arm, B and C are indistinguishable.
+- **Exploration and source review found different bugs.** The runs found 4 bugs that reading the source missed. Reading the source found 8 that no run noticed, including the worst one.
+- **What the agents got wrong points at what the skill must teach:** repeat each probe on every write path, test both sides of a boundary, and don't take the docs as the only oracle.
+
+Full write-up: [`results/pilot-2026-11-09/summary.md`](results/pilot-2026-11-09/summary.md). Lessons for the skill: [`skill-notes.md`](skill-notes.md).
+
+**Next:** three runs per arm with the `claude` CLI, where tool limits are enforced rather than requested.
+
+## Run it yourself
+
+You need Node 20+, Python 3, and an agent CLI. `claude` is the tested one; `codex` and `gemini` adapters exist but are untested.
 
 ```bash
-scripts/setup-target.sh                 # clone the target at the pinned commit, build target/api.md
+scripts/setup-target.sh                 # clone Restful-booker at the pinned commit, generate target/api.md
 scripts/run-arm.sh A 1                  # arm A, run 1, with claude, on port 3001
 scripts/run-arm.sh B 1 claude 3002      # parallel runs need different ports
 scripts/run-arm.sh C 1 claude 3003
 ```
 
-Each run writes `results/<label>/<arm>-run<n>-<agent>/` with the exact prompt, the transcript, the report and timing. The agent runs in a temporary directory holding only the prompt and a copy of the docs; for `claude`, tools are limited to `curl`, reading `api.md` and writing `report.md`.
+Each run gets a temporary directory holding only its prompt and a copy of the docs. For `claude`, tools are limited to `curl`, reading `api.md` and writing `report.md`. Results go to `results/<label>/<arm>-run<n>-<agent>/`: the exact prompt, the transcript, the report and the timing.
 
-`codex` and `gemini` adapters exist in `run-arm.sh` but are untested.
+To score a batch, match each finding to the answer key (see [`scoring/README.md`](scoring/README.md)), then run:
+
+```bash
+python3 -I scripts/score.py scoring/scores-<batch>.csv 38
+```
+
+## How the answer key was built
+
+Restful-booker has no public answer key, so we built one in the spirit of Maaret Pyhäjärvi's "known ceiling": every problem we could confirm, from any source.
+
+1. Arm B's charters were committed before anyone read the target's source (see the git history).
+2. Source review found 30 problems, each reproduced on a fresh server.
+3. Confirmed findings from the runs added 8 more.
+
+The key, the rules and every verdict are in [`scoring/`](scoring/).
 
 ## Layout
 
 ```
-arms/        prompts: shared rules, the three arms, the tour menu
-target/      api.md (the only doc agents see); the target is cloned here by setup
-scripts/     setup, start/stop target, compose prompt, run one arm
-scoring/     how runs are scored; answer key and scores once a batch is done
-results/     one folder per batch of runs
+arms/            prompts: shared rules, the three arms, the tour menu
+scripts/         setup, start/stop target, compose a prompt, run one arm, score
+scoring/         scoring rules, answer key, per-finding verdicts
+results/         one folder per batch of runs
 skill-notes.md   what each experiment teaches for the skill
+target/          the target is cloned here and api.md generated by setup (not committed)
 ```
 
-## Status
+## Credits and license
 
-- Harness: done.
-- **Pilot, 9 Nov 2026** (one run per arm, Claude Opus 5.5 subagents): out of a 38-item ceiling, A found 9, B 18 and C 20, with zero false positives. See [`results/pilot-2026-11-09/summary.md`](results/pilot-2026-11-09/summary.md).
-- Full batch (three runs per arm, `claude` CLI with enforced tool limits): not yet run.
-
-Score a batch: `python3 -I scripts/score.py scoring/scores-<batch>.csv 38`
+- **Target:** [Restful-booker](https://github.com/mwinteringham/restful-booker) by Mark Winteringham (GPL-3.0). It is cloned at setup and not redistributed here.
+- **Method:** charters from Elisabeth Hendrickson's *Explore It!* (2013); tours from James Whittaker's *Exploratory Software Testing* (2009); session structure from Jonathan and James Bach's Session-Based Test Management; scoring against a known ceiling after Maaret Pyhäjärvi; "agentic manual testing" after Simon Willison.
+- **This repo:** MIT, see [`LICENSE`](LICENSE).

@@ -22,13 +22,16 @@ Go through the run's report finding by finding and give each a verdict:
 | DUP | Matches a key item this report already claimed |
 | FP | Not a bug: works as documented, a misread, or the agent's own mistake |
 
+A finding claims one key item: the one its title describes. It claims a second only if its title names that problem too.
+
 Per run, record:
 
-- **Recall** = distinct key items found / ceiling
+- **Recall (findings)** = distinct key items claimed in Findings / ceiling
+- **Recall (noticed)** = the same, also counting confirmed behaviours the agent put under Questions
 - **Precision** = TP / (TP + FP)
 - **Requests used** and **minutes**, from the report and `meta.txt`
 
-Write verdicts to `scores.csv` (one row per finding) and the per-run summary to `summary.md`.
+Write one row per finding or question to `scores-<batch>.csv`. Columns: `run, section (finding|question), item, title, key_ids (;-separated), verdict, note`. Then compute the table with `python3 -I scripts/score.py scoring/scores-<batch>.csv <ceiling>` and write the batch's `summary.md`.
 
 ## Caveats to report with any result
 

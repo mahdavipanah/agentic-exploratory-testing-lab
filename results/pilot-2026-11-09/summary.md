@@ -21,7 +21,7 @@
 ## What stood out
 
 1. **A mission roughly doubled what was found.** A wrote itself a coverage plan ("exercise every documented endpoint") and stopped at 62 requests once it had covered everything. B and C had risk-oriented missions and spent the whole budget digging.
-2. **The agent wrote good missions.** C ranked risks from the docs, put auth bypass first, and wrote five charters with budgets. Auth held up (no bypass), and its other charters found 20 key items. That fits Hamid's hypothesis, but one run proves nothing.
+2. **The agent wrote good missions.** C ranked risks from the docs, put auth bypass first, and wrote five charters with budgets. Auth held up (no bypass), and its other charters found 20 key items. That fits the hypothesis that an agent can write its own missions, but one run proves nothing.
 3. **Zero false positives in any arm.** The evidence rule (only report what you saw and reproduced) kept every finding real. It had a cost: B and C pushed 7 to 8 *confirmed* behaviours into "Questions" because they weren't sure they were bugs. Counted as noticed, recall rises to about 70%.
 4. **Exploration found what source review missed.** Four behaviour bugs (K31 to K34) came only from runs. K31 is a broken documented response format, on a line the source review had read.
 5. **Source review found what exploration missed.** Eight items no run noticed at all, including the two most damaging:
@@ -34,5 +34,5 @@
 
 - One run per arm and one model. The A-to-B/C gap is large; the B-to-C gap is noise.
 - Restful-booker is well known, so the model may remember some of its bugs. The docs were retitled "Booking API" and nothing in the prompts names it.
-- The experimenter (Claude) wrote B's charters, built the answer key and judged the findings. B's charters are in git before the source was read; Hamid should review the verdicts in the CSV.
+- The experimenter (Claude) wrote B's charters, built the answer key and judged the findings. B's charters were committed before the source was read, and every verdict is in the CSV for anyone to check.
 - The shared rules already carry a lot of method (evidence, report format, budget). So arm A is "no mission", not "no guidance", and isn't comparable to Pyhäjärvi's unguided prompt.
