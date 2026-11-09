@@ -80,11 +80,14 @@ else
 fi
 
 OUT="$ROOT/results/$LABEL/$ARM-run$RUN-$AGENT"
-RUN_DIR="$(mktemp -d "${TMPDIR:-/tmp}/aet-run-XXXXXX")"
+# Resolve the real path (pwd -P). On macOS $TMPDIR is under /var, a symlink to /private/var, and the CLI
+# matches its permission rules against the resolved path: a prompt that names the /var spelling gets the
+# report write denied (this happened in batch-1; see results/batch-1/README.md).
+RUN_DIR="$(cd "$(mktemp -d "${TMPDIR:-/tmp}/aet-run-XXXXXX")" && pwd -P)"
 mkdir -p "$OUT"
 
 if [ "$ISOLATION" = "fresh" ]; then
-  CONFIG_HOME="$(mktemp -d "${TMPDIR:-/tmp}/aet-home-XXXXXX")"
+  CONFIG_HOME="$(cd "$(mktemp -d "${TMPDIR:-/tmp}/aet-home-XXXXXX")" && pwd -P)"
 fi
 
 # Always stop the target and remove the temp dirs, even if the agent fails.
@@ -180,8 +183,15 @@ fi
     printf 'auto_memory=disabled\nfresh_home_files=%s\nfresh_home_memory_files=%s\n' \
       "$(wc -l < "$OUT/fresh-home-files.txt" | tr -d ' ')" "$(grep -c -i 'memory' "$OUT/fresh-home-files.txt" || true)"
   fi
-  [ -f "$OUT/transcript.jsonl" ] && python3 -I "$ROOT/scripts/transcript_stats.py" "$OUT/transcript.jsonl"
+  if [ -f "$OUT/transcript.jsonl" ]; then
+    python3 -I "$ROOT/scripts/transcript_stats.py" "$OUT/transcript.jsonl"
+    # If the report was not saved, rebuild it from the agent's own Write/Edit calls (report_source=transcript).
+    python3 -I "$ROOT/scripts/recover-report.py" "$OUT"
+  fi
 } > "$OUT/meta.txt"
+if grep -q '^report_source=transcript$' "$OUT/meta.txt"; then
+  echo "warning: the agent's report write was refused; report.md was rebuilt from the transcript." >&2
+fi
 [ "$AGENT_EXIT" -eq 0 ] || echo "warning: $AGENT exited with status $AGENT_EXIT; see $OUT" >&2
 if [ "$ISOLATION" = "login" ] && grep -q . "$OUT/login-home-memory-changes.txt"; then
   echo "warning: memory files in your Claude Code home changed during this run (see $OUT/login-home-memory-changes.txt)." >&2

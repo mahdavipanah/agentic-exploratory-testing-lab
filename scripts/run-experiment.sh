@@ -42,10 +42,11 @@ grep -q '^agent_exit=0$' "$S/meta.txt" || {
   fail "the test session did not finish cleanly (see $S). If it says you're not logged in, run 'claude' once and log in."
 }
 grep -q '^### F' "$S/report.md" || fail "the test session wrote no findings (see $S/report.md)"
+grep -q '^report_source=file$' "$S/meta.txt" || fail "the agent could not save report.md itself (permission problem; see $S/transcript.jsonl)"
 if grep -q '^login_home_memory_changes=[1-9]' "$S/meta.txt" || grep -q '^fresh_home_memory_files=[1-9]' "$S/meta.txt"; then
   fail "memory files were written during the test session (see $S)"
 fi
-grep -E '^(isolation|agent_exit|curl_invocations_counted|num_turns|total_cost_usd|login_home_memory_changes|fresh_home_memory_files)=' "$S/meta.txt"
+grep -E '^(isolation|agent_exit|model_used|curl_invocations_executed|report_source|num_turns|total_cost_usd|login_home_memory_changes|fresh_home_memory_files)=' "$S/meta.txt"
 rm -rf "results/$SMOKE"
 
 step "5/5 Batch: $RUNS runs of each arm in '$ARMS', shuffled, 4 at a time"
