@@ -14,6 +14,7 @@ Everything we learn from the experiment that should end up in the skill. Each no
 ## Lessons from building the harness
 
 - **A check can pass for the wrong reason.** The first `start-target.sh` "restarted" the server and then pinged it. The ping passed, but the old server answered: the new one had failed to bind the port, and old data leaked into the next session. Only a stateful probe caught it: create a booking, restart, and check that the new id is the seed's next id again. Skill rule: **before exploring, verify the environment is in the state you think, with a probe whose answer would differ if it weren't.**
+- **The environment is part of the test.** The target formats dates in the server's local time. In New York every date comes back a day early; in UTC the bug is invisible. Skill rule: **record the environment (timezone, versions, config) with every session, and when a result looks environment-shaped, vary the environment.**
 - **Docs are an oracle and a target.** The published docs contradict themselves (a "Success 200" table above a `201 Created` example; PATCH examples that use PUT). The skill should treat doc-vs-behaviour gaps as findings to report, and say which side looks wrong.
 
 ## Lessons from runs

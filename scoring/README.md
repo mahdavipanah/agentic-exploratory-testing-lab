@@ -10,7 +10,7 @@ Restful-booker has no public answer key, so the key is built the way Maaret Pyh√
    - `behaviour`: the API does something wrong (accepts invalid data, crashes, bypasses auth, loses data).
    - `contract`: behaviour and docs disagree, and either could be the one to fix (wrong status code, field missing from docs).
 
-The **ceiling** is the number of key items. It grows as runs find new, confirmed problems.
+The **ceiling** is the number of key items. It grows as runs find new, confirmed problems. `scripts/verify-answer-key.py` replays every item against a fresh target, so the key can be checked at any time.
 
 ## Scoring a run
 
@@ -31,7 +31,7 @@ Per run, record:
 - **Precision** = TP / (TP + FP)
 - **Requests used** and **minutes**, from the report and `meta.txt`
 
-Write one row per finding or question to `scores-<batch>.csv`. Columns: `run, section (finding|question), item, title, key_ids (;-separated), verdict, note`. Then compute the table with `python3 -I scripts/score.py scoring/scores-<batch>.csv <ceiling>` and write the batch's `summary.md`.
+Start the sheet with `python3 -I scripts/extract-findings.py results/<batch> > scoring/scores-<batch>.csv`, which writes one row per finding or question. Columns: `run, section (finding|question), item, title, key_ids (;-separated), verdict, note`. Then compute the table with `python3 -I scripts/score.py scoring/scores-<batch>.csv <ceiling>` and write the batch's `summary.md`.
 
 ## Caveats to report with any result
 

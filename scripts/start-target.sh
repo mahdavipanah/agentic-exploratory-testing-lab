@@ -39,7 +39,9 @@ LOG="/tmp/aet-target-$PORT.log"
 stop_port "$PORT"
 
 # exec makes the background subshell become node, so $! is node's pid.
-( cd "$DEST" && PORT="$PORT" SEED=true exec node ./bin/www ) > "$LOG" 2>&1 &
+# TZ is pinned to UTC: the target formats dates in local time, so in timezones
+# west of UTC every date shifts back a day (see scoring/answer-key.md, "Environment-dependent").
+( cd "$DEST" && PORT="$PORT" SEED=true TZ=UTC exec node ./bin/www ) > "$LOG" 2>&1 &
 echo $! > "$PIDFILE"
 
 for _ in $(seq 1 40); do

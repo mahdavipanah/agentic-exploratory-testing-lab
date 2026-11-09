@@ -1,5 +1,7 @@
 # Answer key: Restful-booker at commit 619d031
 
+> Replay every item yourself: `python3 -I scripts/verify-answer-key.py`. The latest output is in [`answer-key-verification.md`](answer-key-verification.md).
+
 Built **after** arm B's charters were committed (see git history), by reading `routes/index.js`, `helpers/*.js` and `models/booking.js`, then reproducing every item against a fresh local server (port 3009, 9 Nov 2026).
 
 - `source`: found by source review. `run`: added from a confirmed finding in a run.
@@ -86,3 +88,12 @@ Each was reproduced on a fresh server after the pilot. None was on the source-re
 ## Ceiling
 
 **38 items**: 30 from source review (K01 to K30) and 8 from runs (K31 to K38).
+
+## Environment-dependent (not in the ceiling)
+
+| ID | Type | Problem | Reproduction (observed) |
+| --- | --- | --- | --- |
+| E01 | behaviour | Dates are formatted in the server's local time, so on a server west of UTC every date shifts back a day | Server with `TZ=America/New_York`: checkin `2018-01-01` is returned as `2017-12-31` |
+
+E01 can't be seen when the server runs in UTC, so a black-box explorer can't find it under this setup. `start-target.sh` pins `TZ=UTC` so that results don't depend on the machine running the experiment. The pilot also ran in UTC.
+
