@@ -39,13 +39,14 @@ Charters use Elisabeth Hendrickson's template, *Explore (target) with (resources
 | A, no mission | 35% (33–38%) | 46% | 0 of 62 | 66 |
 | B, experimenter's charters | 46% (44–49%) | 62% | 0 of 82 | 80 |
 | C, agent's own charters | 39% (18–49%) | 50% | 0 of 58 | 65 |
-| D, the skill | 48% (38–59%) | 55% | 0 of 78 | 76 |
-| M, docs only, no API | 51% (49–56%) | 51% | 51 of 161 predictions don't match | 0 |
+| D, the skill | 48% (38–59%) | 56% | 0 of 78 | 76 |
+| M, docs only, no API | 50% (46–54%) | 50% | 56 of 161 predictions don't match | 0 |
 
 - **A mission helps.** B and D beat A: p = 0.008 and 0.016 (exact permutation test). C is not distinguishable from A: four C runs scored 36–49%, but one stopped at 37 of 80 requests and scored 18%.
 - **The skill matches human charters, and finds different bugs.** One of them, re-keying a booking through `bookingid`, appeared in 4 of 5 D runs and nowhere else. The skill was written after the pilot on this same app, so this is not a test of how it generalizes.
-- **Memory alone scores as high as exploring.** Arm M, docs only, recognized Restful-booker in all five runs. For much of the key, recall here can't separate exploring from remembering. Nine items were found only by exploring; they show up only when you run the system and watch its responses and state.
-- **No sign of carry-over** between sessions: Spearman rho = +0.22, p = 0.29.
+- **Memory alone scores as high as exploring.** Arm M, docs only, recognized Restful-booker in all five runs. For much of the key, recall here can't separate exploring from remembering. Ten items were found only by exploring; they show up only when you run the system and watch its responses and state.
+- **No sign of carry-over** between sessions: Spearman rho = +0.11, p = 0.61.
+- **The scoring was checked:** a second scorer re-scored 101 rows blind and agreed on 91. The disagreements are settled in the summary.
 
 Full write-up: [`results/batch-1/summary.md`](results/batch-1/summary.md). One harness bug affected this batch and was repaired from the transcripts; see [`results/batch-1/README.md`](results/batch-1/README.md).
 

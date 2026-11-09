@@ -19,8 +19,8 @@
 | A | "Find bugs in this API." | 35% (33–38%) | 46% | 0 of 62 | 66 | 3.0 | $0.91 |
 | B | Four charters written for it | 46% (44–49%) | 62% | 0 of 82 | 80 | 4.1 | $1.18 |
 | C | Write your own charters first | 39% (18–49%) | 50% | 0 of 58 | 65 | 3.5 | $0.99 |
-| D | The exploratory-testing skill | 48% (38–59%) | 55% | 0 of 78 | 76 | 4.1 | $1.26 |
-| M | Docs only, no API: predict the bugs | 51% (49–56%) | 51% | 51 of 161 don't match the key | 0 | 0.8 | $0.23 |
+| D | The exploratory-testing skill | 48% (38–59%) | 56% | 0 of 78 | 76 | 4.1 | $1.26 |
+| M | Docs only, no API: predict the bugs | 50% (46–54%) | 50% | 56 of 161 don't match the key | 0 | 0.8 | $0.23 |
 
 **Column definitions.**
 - *Recall, findings:* distinct key items in the Findings section, out of 39.
@@ -37,12 +37,12 @@
 | C vs A | +4 points | 0.64 |
 | D vs B | +3 points | 0.63 |
 | C vs B | −7 points | 0.41 |
-| M vs A | +16 points | 0.008 |
-| M vs B | +6 points | 0.024 |
-| M vs C | +12 points | 0.048 |
-| M vs D | +3 points | 0.56 |
+| M vs A | +15 points | 0.008 |
+| M vs B | +5 points | 0.056 |
+| M vs C | +11 points | 0.063 |
+| M vs D | +2 points | 0.71 |
 
-**Carry-over check.** Spearman rho between the order sessions ran in and each session's recall minus its arm's mean: +0.22, p = 0.29. There is no sign that later sessions did better.
+**Carry-over check.** Spearman rho between the order sessions ran in and each session's recall minus its arm's mean: +0.11, p = 0.61. There is no sign that later sessions did better.
 
 ## What the numbers say
 
@@ -57,13 +57,13 @@
 
    These trace to skill rules: "include fields the docs don't list, such as ids and other server-owned fields", "repeat each probe on every path", and the timezone item in the familiar-problems oracle. D also reported the 201 status codes as findings (3 of 5 runs). A–C left them under Questions because the docs show 201, and the skill says behaviour that matches wrong docs is still a finding. **But** those skill rules were written after the pilot, by someone who had seen this app's answer key. D is not a test of how the skill generalises. That needs a different target.
 
-4. **On this app, memory alone scores as high as exploring.** Arm M never touched the API. All five M runs named Restful-Booker, and 86 of M's 96 matched predictions cite prior knowledge. Its recall (51%) is at least as high as every exploring arm. It is significantly higher than A, B and C, though not D.
+4. **On this app, memory alone scores as high as exploring.** Arm M never touched the API. All five M runs named Restful-Booker, and 84 of M's 94 matched predictions cite prior knowledge. Its recall (50%) is significantly higher than A's (p = 0.008), and level with B, C and D.
 
-   Memory has two costs. 51 of 161 predictions (32%) don't match a key item. Some are real behaviours the key doesn't include (403 instead of 401). Others are wrong: for example, that XML input comes back with every value as a string.
+   Memory has two costs. 56 of 161 predictions (35%) don't match a key item. Some are real behaviours the key doesn't include (403 instead of 401). Others are wrong: for example, that XML input comes back with every value as a string.
 
    For about two-thirds of the key, recall here cannot tell exploring from remembering. The two exploring agents that mentioned Restful-Booker in their visible output (A-run3, D-run1) show recognition happens during exploring too. The agents' private reasoning is not in the transcripts.
 
-5. **What only exploring found.** Nine key items appeared in exploring runs and in no M run:
+5. **What only exploring found.** Ten key items appeared in exploring runs and in no M run:
    - the error text returned for the URL-encoded Accept (K31)
    - XML labelled as HTML (K32)
    - date rollover (K33)
@@ -73,10 +73,11 @@
    - PUT merging (K30)
    - corrupt dates matching every filter (K34)
    - the timezone shift (K39)
+   - ids parsed leniently, so `/booking/1abc` is booking 1 (K26)
 
    They depend on what the system actually returns, or on state built up across requests. You see them by running the system, not by reading about it.
 
-   Restricted to the 14 items no M run predicted, recall was A 14%, B 24%, C 19%, D 23%. B vs A gives p = 0.03; the other differences are not significant. This restriction was chosen after seeing the data, so treat it as a lead, not a result.
+   Restricted to the 15 items no M run predicted, recall was A 15%, B 23%, C 19%, D 21%. B vs A gives p = 0.03; the other differences are not significant. This restriction was chosen after seeing the data, so treat it as a lead, not a result.
 
 6. **Exploring was precise.** None of the 280 findings from A–D was a false positive. Every one came with the command and the output (the evidence rule). Things the agents weren't sure about went under Questions.
 
@@ -85,6 +86,20 @@
    - three documentation defects (K28, K36, K37). The pilot's C run raised K36 and K37 as questions.
 
    The PATCH examples using `curl -X PUT` (K29) appeared only as a question.
+
+## Checking the scoring
+
+A second scorer (a separate Claude agent) re-scored 101 rows blind: it had the answer key and the rules, but never saw this mapping.
+- **The sample:** every row with a judgement-call note, plus 45 chosen at random.
+- **Agreement:** 91 of 101 rows (90%). Eight of the ten disagreements were arm-M predictions; it read "the title must commit to an outcome" more strictly than I first had.
+- **Adopted (7 rows):**
+  - five M predictions changed to FP
+  - two questions given key items I had missed: D-run4 Q1 (K29) and C-run1 Q1 (K07)
+- **Kept (3 rows):**
+  - two catch-all M hedges stay FP
+  - M-run5 F5 stays K09, to match how the same title was scored in the other four M runs
+
+The second scorer's answers are in [`scoring/blind-check-batch-1.txt`](../../scoring/blind-check-batch-1.txt), and the changed rows are marked "(blind check)" in the map. The numbers above are after the check; before it, M was 51%, and its leads over B and C were significant.
 
 ## Compared with the pilot
 

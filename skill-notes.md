@@ -51,7 +51,7 @@ From `results/batch-1/summary.md` (5 isolated runs per arm):
    - The timezone item in the familiar-problems oracle found a new key item (K39).
 
    Keep all three.
-4. **Memory is a weak oracle; evidence is the strong one.** With docs and no API, the model named Restful-booker in every run and predicted half the key. But 32% of its predictions matched nothing in the key, and some were plainly wrong. The exploring arms had 0 false positives in 280 findings, because every finding needed a command and its output. Rule to keep: if you recognise the system, use that to choose what to probe, never as evidence.
+4. **Memory is a weak oracle; evidence is the strong one.** With docs and no API, the model named Restful-booker in every run and predicted half the key. But 35% of its predictions matched nothing in the key, and some were plainly wrong. The exploring arms had 0 false positives in 280 findings, because every finding needed a command and its output. Rule to keep: if you recognise the system, use that to choose what to probe, never as evidence.
 5. **What only exploring finds is what the skill is for.** These come from watching responses and state, not from reading:
    - an error message returned with 200
    - XML labelled as HTML

@@ -213,7 +213,7 @@ C-run1-claude,finding,F3,"POST /booking with missing required fields returns 500
 C-run1-claude,finding,F4,No business-rule validation — negative price and checkout-before-checkin accepted,K11;K13,TP,
 C-run1-claude,finding,F5,Malformed date in GET /booking query returns 500,K17,TP,
 C-run1-claude,finding,F6,PUT/DELETE to a non-existent booking id returns 405 instead of 404,K06,TP,
-C-run1-claude,question,Q1,"Auth looks solid: PUT/PATCH/DELETE returned 403 for absent token, empty token (`token=`), bogus token, truncated-prefix ",,,
+C-run1-claude,question,Q1,"Auth looks solid: PUT/PATCH/DELETE returned 403 for absent token, empty token (`token=`), bogus token, truncated-prefix ",K07,,"""auth looks solid"", but it records POST /auth returning 200 for a wrong password (blind check)"
 C-run1-claude,question,Q2,XML and URL-encoded responses are served with `Content-Type: text/html; charset=utf-8` instead of `application/xml` / `a,K32,,
 C-run1-claude,question,Q3,GET /booking name filters are case-sensitive (`firstname=DEP&lastname=falsej` returned `[]` while the stored value was `,K18,,
 C-run1-claude,question,Q4,"`GET /ping` and `DELETE /booking/:id` return HTTP 201 (documented as such, odd for a GET/health check, but matches the d",K01;K05,,
@@ -373,7 +373,7 @@ D-run4-claude,finding,F11,A badly formatted date in a search filter returns 500,
 D-run4-claude,finding,F12,PUT and DELETE on a booking that doesn't exist return 405 instead of 404,K06,TP,
 D-run4-claude,finding,F13,POST /auth with wrong credentials returns 200,K07,TP,
 D-run4-claude,finding,F14,"Name filters are case-sensitive, but the docs example uses lowercase names",K18,TP,
-D-run4-claude,question,Q1,"Do the docs agree with the status codes? DELETE success returns `201 Created`, which matches the example but is unusual ",K05,,
+D-run4-claude,question,Q1,"Do the docs agree with the status codes? DELETE success returns `201 Created`, which matches the example but is unusual ",K05;K29,,also names the PATCH examples using curl -X PUT (blind check)
 D-run4-claude,question,Q2,"The urlencoded create left out `additionalneeds` and still got 200, even though the docs mark it as required. I didn't c",K35,,
 D-run4-claude,question,Q3,Is a token ever invalidated? I didn't test whether tokens expire or whether calling `/auth` again revokes the old one.,,,
 D-run4-claude,question,Q4,What does `GET /booking/1` return after a DELETE when there are duplicate id-1 entries (see F1)? Which record gets delet,K24,,
@@ -429,9 +429,9 @@ M-run1-claude,finding,F27,Tokens never expire and are not invalidated,,FP,
 M-run1-claude,finding,F28,Hard-coded default credentials admin/password123 work,,FP,
 M-run1-claude,finding,F29,Unknown or extra fields are accepted silently,,FP,extra fields on POST: not K24 (which is PUT/PATCH)
 M-run1-claude,finding,F30,Duplicate bookings are allowed,,FP,
-M-run1-claude,finding,F31,"The docs' URL-encoded request examples are not supported, or the response format is wrong",K38,TP,names the Content-Type row vs URL-encoded examples contradiction
+M-run1-claude,finding,F31,"The docs' URL-encoded request examples are not supported, or the response format is wrong",,FP,title predicts the URL-encoded examples are unsupported (they work); the docs contradiction is only in the body (blind check)
 M-run1-claude,finding,F32,XML input parsing coerces types wrongly,,FP,XML types as strings: wrong
-M-run1-claude,finding,F33,Missing Accept header causes an error or the wrong format,K19,DUP,missing Accept -> 418 (true; */* alone is fine)
+M-run1-claude,finding,F33,Missing Accept header causes an error or the wrong format,,FP,"""an error or the wrong format"": no committed outcome (blind check)"
 M-run1-claude,finding,F34,PATCH and PUT accept a Cookie token with extra whitespace or tokens from any user / any token value,,FP,title about cookie tokens; body hedges include K27
 M-run2-claude,finding,F1,POST /auth with wrong credentials returns 200 instead of 401,K07,TP,
 M-run2-claude,finding,F2,POST /auth with missing or malformed body still returns 200,K07,DUP,
@@ -494,9 +494,9 @@ M-run3-claude,finding,F24,"Basic auth accepted with weak, hard-coded credentials
 M-run3-claude,finding,F25,Unsanitised input is stored and reflected (XSS / injection),,FP,
 M-run3-claude,finding,F26,POST /booking returns 200 instead of 201 Created,K02,TP,
 M-run3-claude,finding,F27,Inconsistent XML response root and format,,FP,
-M-run3-claude,finding,F28,Accept header missing defaults inconsistently,K19,DUP,missing Accept -> 418 (true; */* alone is fine)
+M-run3-claude,finding,F28,Accept header missing defaults inconsistently,,FP,"""defaults inconsistently"": no committed outcome (blind check)"
 M-run3-claude,finding,F29,additionalneeds actually optional (docs say required),K35,TP,
-M-run3-claude,finding,F30,Large or non-integer ids handled badly,K26,TP,non-integer ids match an unexpected booking
+M-run3-claude,finding,F30,Large or non-integer ids handled badly,,FP,"""handled badly"": no committed outcome in the title (blind check)"
 M-run4-claude,finding,F1,POST /auth with wrong credentials returns 200 instead of 401,K07,TP,
 M-run4-claude,finding,F2,"POST /auth with a missing or empty body returns 200 ""Bad credentials"" instead of 400",K07,DUP,
 M-run4-claude,finding,F3,DELETE /booking/:id returns 201 Created on success,K05,TP,
@@ -524,7 +524,7 @@ M-run4-claude,finding,F24,additionalneeds is documented as required but can be l
 M-run4-claude,finding,F25,Auth tokens never expire and are not invalidated,,FP,
 M-run4-claude,finding,F26,Hardcoded default credentials admin/password123 are accepted,,FP,
 M-run4-claude,finding,F27,POST /booking returns 200 instead of 201 Created,K02,TP,
-M-run4-claude,finding,F28,"A deleted booking stays reachable, or the delete is not idempotent",K06,DUP,second DELETE -> 405
+M-run4-claude,finding,F28,"A deleted booking stays reachable, or the delete is not idempotent",,FP,"title ""stays reachable or not idempotent"" does not commit to 405 (blind check)"
 M-run4-claude,finding,F29,XML and urlencoded input is parsed inconsistently (types are lost),,FP,XML/urlencoded types as strings: wrong
 M-run4-claude,finding,F30,"GET /booking/:id with no Accept header, or `*/*`, returns 418 or the wrong format",K19,DUP,missing Accept -> 418 (true)
 M-run4-claude,finding,F31,A float or very large totalprice is truncated or rounded,K08,TP,

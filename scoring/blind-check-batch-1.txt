@@ -1,0 +1,104 @@
+# Blind re-score of batch-1 (101 rows: every noted row in map-batch-1.txt plus 45 random, seed 20261109).
+# Scored by a separate Claude agent from scoring/answer-key.md and scoring/README.md only, without seeing the map.
+# Format: <run> <item> <keys> [| reason]. 91 of 101 agreed with the map before the check; see results/batch-1/summary.md.
+B-run5 F16 K25
+B-run4 F17 K30
+B-run1 F14 K17
+M-run2 F34 FP | title vague; Basic-case 403 (K27) not predicted (body guesses 500)
+M-run1 F21 K19
+M-run4 F29 FP | predicts types returned as strings, not K14 false->true; K31 only hedged in body
+D-run4 Q1 K05;K29 | question names DELETE 201 and PATCH examples using curl -X PUT
+M-run2 F18 K17 | hedge "500 or ignores the filter" commits to 500
+M-run5 F16 FP | 403 vs 401 is outside the key
+M-run5 F14 FP | "is not rejected", no committed outcome in title
+D-run1 Q2 - | checkout-filter analog of K34 (invalid stored dates); K34 is checkin-only
+D-run4 Q3 - | token expiry not tested, not a bug claim
+M-run1 F32 FP | predicts string types, not K14's false->true
+M-run1 F5 FP | 403 vs 401 is outside the key
+A-run4 F1 K16
+M-run5 F30 FP | predicts acceptance or 500, not K08 corruption
+M-run3 F18 K18
+M-run3 F7 FP | 403 vs 401 is outside the key
+D-run1 F12 K39
+A-run3 Q1 K18
+B-run2 F8 K12 | title paraphrases K12 ("invalid dates accepted and changed"); rollover (K33) shown only in body
+D-run1 F16 K32
+D-run1 F9 K31
+C-run1 F2 K09 | generic wrong-type coercion title; depositpaid and bad date only in body
+C-run3 F7 K03;K04;K25;K17 | title names missing fields, wrong-typed names, unsupported content type, invalid filter dates
+M-run4 F28 FP | title ("stays reachable or not idempotent") does not commit to 405; 405 only in body
+M-run4 F20 K17 | hedge commits to 500
+M-run2 F22 K38 | urlencoded accepted although header table lists only JSON/XML
+M-run3 F9 K35 | "partially accepts it" = accepts PUT without additionalneeds (body); weak hedge
+M-run5 F28 FP | urlencoded response actually errors (K31), not missing additionalneeds
+A-run3 F6 K14
+A-run3 Q4 - | token lifetime, not a key item
+M-run1 F10 K09 | title commits to "accepts wrong field types"
+C-run1 Q1 K07 | describes 200 for failed login
+M-run1 F31 FP | title predicts examples unsupported or vague wrong format; body says 418
+B-run2 F7 K03;K04
+B-run1 F16 K06
+M-run2 F33 FP
+M-run3 F11 K12
+D-run3 F5 K14
+M-run3 F17 K15;K16 | "date filters use the wrong comparison" covers both filters
+C-run3 F13 K32
+M-run3 F22 K24 | PATCH/PUT can change bookingid = re-keying
+M-run5 F31 FP | plain-text 404 not a key item; second-DELETE 405 only in body
+M-run4 F19 K15;K16 | both filters, ">=" rule broken
+B-run2 F10 K09;K21 | title names non-numeric price -> null and numeric names via PATCH
+M-run3 F23 FP
+M-run1 F26 FP | /booking/abc -> 404 is not K26 (lenient parsing)
+M-run2 F11 K12
+M-run3 F30 FP | "handled badly", no committed outcome in title
+B-run1 F1 K22
+M-run2 F31 FP
+C-run4 F5 K15;K16 | title covers both date filters
+M-run4 F7 FP | 403 vs 401 is outside the key
+D-run2 F15 K07
+M-run1 F29 FP | extra fields on POST, not K24
+C-run4 F8 K11;K13
+B-run4 F3 K14 | any string -> true is K14's cause; "no" -> true
+B-run5 Q1 K21 | PATCH accepting numeric firstname
+B-run2 F3 K08
+B-run4 F8 K13;K11
+B-run1 Q3 - | bad Basic header ignored with valid cookie; not a key item
+M-run5 F22 FP | malformed JSON gives 400, not a key item
+M-run1 F25 K30 | hedge includes "partially updates" = PUT merges
+B-run1 Q6 - | float precision loss below 1e21, not K08's parseInt mangling
+A-run1 F7 K09 | generic wrong-type title; depositpaid/date only in body
+M-run5 F7 K13
+D-run1 F5 K09;K14 | title names "abc"->null and "no"/"yes"->true
+M-run1 F20 FP | "is not rejected", no committed outcome
+B-run1 F13 K25
+M-run5 F24 K21
+B-run1 F4 K09;K21 | title names POST and PATCH; PATCH type gaps are K21
+C-run2 F11 K25
+M-run5 F5 FP | "does not check field types" has no committed outcome (like "not rejected")
+A-run2 F6 K12;K09
+A-run1 F5 K03
+M-run1 F2 K07 | /auth failure returns 200 "Bad credentials"
+C-run2 F8 K11;K13
+B-run3 F6 K16
+M-run1 F34 FP | Basic case-sensitivity only hedged in body
+M-run2 F5 FP | 403 vs 401 is outside the key
+M-run4 F30 K19 | predicts 418 for a client-default Accept; */* itself seems to work
+C-run2 F10 K17
+M-run1 F33 FP | "an error or the wrong format", no committed 418
+D-run3 F11 K06
+D-run5 Q2 - | checkout-filter analog of K34; K34 is checkin-only
+B-run3 F10 K09;K21 | empty value shown only via PATCH (K21), not create (K10)
+C-run2 F6 K12 | same as B-run2 F8; rollover (K33) only in body
+M-run3 F28 FP | "defaults inconsistently", no committed outcome
+M-run1 F22 K25 | hedge commits to 500 for unsupported Content-Type
+M-run5 F4 K03
+A-run5 Q5 K01;K05 | docs say 200 for DELETE and /ping, API returns 201
+B-run4 F1 K22
+M-run1 F16 FP
+A-run5 F7 K31
+M-run4 F26 FP
+M-run4 F10 K09;K14 | title names totalprice and depositpaid coercion (to null / true)
+M-run3 F19 K17 | hedge includes 500
+M-run3 F13 K11;K08
+D-run4 F3 K21 | wrong-type totalprice via PATCH is K21, not K09
+C-run4 F6 K09;K12;K33
