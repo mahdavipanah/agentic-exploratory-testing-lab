@@ -7,10 +7,18 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 COMMIT="619d03162c050baae7d22fdcf983a22f9da6faed"   # 23 Oct 2026, in-memory (LokiJS) storage
 DEST="$ROOT/target/restful-booker"
 
+# Restful-booker is public, so no login is ever needed: never let git prompt for a username or password.
+export GIT_TERMINAL_PROMPT=0
+git_hint() {
+  echo "git could not fetch https://github.com/mwinteringham/restful-booker without a login, but it is public." >&2
+  echo "Check your git config for URL rewrites or credential helpers:" >&2
+  echo "  git config --show-origin --get-regexp '^(url|credential)\.'" >&2
+  exit 1
+}
 if [ ! -d "$DEST/.git" ]; then
-  git clone https://github.com/mwinteringham/restful-booker.git "$DEST"
+  git clone https://github.com/mwinteringham/restful-booker.git "$DEST" || git_hint
 fi
-git -C "$DEST" fetch --quiet origin
+git -C "$DEST" fetch --quiet origin || git_hint
 git -C "$DEST" checkout --quiet "$COMMIT"
 (cd "$DEST" && npm ci --no-audit --no-fund)
 
