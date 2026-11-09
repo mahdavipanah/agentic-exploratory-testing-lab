@@ -22,6 +22,8 @@ Go through the run's report finding by finding and give each a verdict:
 | DUP | Matches a key item this report already claimed |
 | FP | Not a bug: works as documented, a misread, or the agent's own mistake |
 
+Findings marked `Kind: needs a decision` (arm D's report format) are scored like any other finding. Because that format moves confirmed-but-unsure items out of Questions, compare arms on "noticed" recall as well.
+
 A finding claims one key item: the one its title describes. It claims a second only if its title names that problem too.
 
 Per run, record:

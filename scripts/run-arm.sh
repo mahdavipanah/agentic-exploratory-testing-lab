@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Run one exploration session: fresh target, isolated run directory, one agent CLI.
 #
-# Usage: scripts/run-arm.sh <A|B|C> <run-number> [agent] [port] [results-label]
+# Usage: scripts/run-arm.sh <A|B|C|D> <run-number> [agent] [port] [results-label]
 #   agent: claude (default) | codex | gemini | dry
 #          "dry" runs the whole pipeline without an LLM, to check your setup.
 #   port:  3001 by default; use different ports to run arms in parallel

@@ -1,6 +1,6 @@
 # Agentic Exploratory Testing Lab
 
-Experiments behind the essay *Teaching Agents to Explore* (link coming soon) and the exploratory-testing skill for Claude and other coding agents that grows out of it.
+Experiments behind the essay *Teaching Agents to Explore* (link coming soon), and the [exploratory-testing skill](skills/exploratory-testing/SKILL.md) for Claude and other coding agents that grows out of them.
 
 **The question:** can a coding agent explore software well on its own if you give it a written mission, and can it write that mission itself?
 
@@ -8,13 +8,14 @@ Experiments behind the essay *Teaching Agents to Explore* (link coming soon) and
 
 ## The experiment
 
-One target, three arms. The arms differ only in the mission the agent gets:
+One target, four arms. The arms differ only in the mission the agent gets:
 
 | Arm | Mission | Prompt |
 | --- | --- | --- |
 | A | None: "Find bugs in this API." | [`arms/A-baseline.md`](arms/A-baseline.md) |
 | B | Four charters written by the experimenter from the docs, each with a tour | [`arms/B-human-charters.md`](arms/B-human-charters.md) |
 | C | The agent lists risks, writes its own charters, then explores them | [`arms/C-agent-charters.md`](arms/C-agent-charters.md) |
+| D | The [exploratory-testing skill](skills/exploratory-testing/) (v0), written from the pilot's lessons | [`arms/D-skill.md`](arms/D-skill.md) |
 
 The rest is the same in every arm ([`arms/shared-rules.md`](arms/shared-rules.md)):
 
@@ -23,6 +24,8 @@ The rest is the same in every arm ([`arms/shared-rules.md`](arms/shared-rules.md
 - An evidence rule: only report what you saw and reproduced.
 - A fixed report format.
 - A freshly restarted target.
+
+Arm D was added after the pilot. Because the skill was written from the pilot's lessons on this same target, a good D score here shows the lessons were applied. It does not show the skill generalizes; that needs a target the skill has never seen (planned).
 
 Charters use Elisabeth Hendrickson's template, *Explore (target) with (resources) to discover (information)*. Tours come from James Whittaker's *Exploratory Software Testing* ([`arms/tours.md`](arms/tours.md)).
 
@@ -42,7 +45,28 @@ Charters use Elisabeth Hendrickson's template, *Explore (target) with (resources
 
 Full write-up: [`results/pilot-2026-11-09/summary.md`](results/pilot-2026-11-09/summary.md). Lessons for the skill: [`skill-notes.md`](skill-notes.md).
 
-**Next:** three runs per arm with the `claude` CLI, where tool limits are enforced rather than requested.
+**Next:** three runs per arm (A to D) with the `claude` CLI, where tool limits are enforced rather than requested.
+
+## The skill
+
+[`skills/exploratory-testing`](skills/exploratory-testing/) packages the method in the open [Agent Skills](https://agentskills.io) format, so any agent that reads `SKILL.md` can use it: Claude Code, Codex, Cursor, Gemini CLI and others. It covers:
+
+- Checking the environment before exploring.
+- Listing risks before endpoints.
+- Charters with tours and budgets.
+- Rules for the blind spots the pilot exposed.
+- Evidence for every claim.
+- A report that separates bugs, behaviour that needs a decision, and unconfirmed suspicions.
+
+To install it with the [skills CLI](https://skills.sh):
+
+```bash
+npx skills add https://github.com/mahdavipanah/agentic-exploratory-testing-lab --skill exploratory-testing
+```
+
+Or copy `skills/exploratory-testing/` into your agent's skills folder: for Claude Code, `~/.claude/skills/` or a project's `.claude/skills/`. Then ask your agent to "explore" a feature, an API or an app you just built.
+
+To check the skill against the spec: `python3 -I scripts/validate-skill.py skills/exploratory-testing`, or `skills-ref validate` from the [official reference library](https://github.com/agentskills/agentskills/tree/main/skills-ref).
 
 ## Reproduce it
 
@@ -65,12 +89,12 @@ The last line should read `38 of 38 items reproduced.` The output from our machi
 scripts/run-batch.sh smoke 1 dry && rm -rf results/smoke
 ```
 
-This runs arms A, B and C in parallel, with a stand-in agent that sends one request. If it passes, ports, prompts and result folders all work.
+This runs arms A to D in parallel, with a stand-in agent that sends one request. If it passes, ports, prompts and result folders all work.
 
 ### 3. Run a batch
 
 ```bash
-AET_MODEL=claude-opus-5-5 scripts/run-batch.sh batch-1 3    # 3 runs per arm with the claude CLI
+AET_MODEL=claude-opus-5-5 scripts/run-batch.sh batch-1 3    # arms A to D, 3 runs each: 12 sessions
 ```
 
 Every session runs the same way:
@@ -118,7 +142,8 @@ The key, the rules and every verdict are in [`scoring/`](scoring/).
 ## Layout
 
 ```
-arms/            prompts: shared rules, the three arms, the tour menu
+arms/            prompts: shared rules, the four arms, the tour menu
+skills/          the exploratory-testing skill (Agent Skills format)
 scripts/         setup, start/stop target, verify the answer key, run a session or a batch, extract and score findings
 scoring/         scoring rules, answer key and its verification, per-finding verdicts
 results/         one folder per batch of runs

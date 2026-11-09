@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 # Run a whole batch: every arm, N runs each. Arms run in parallel (one port each); runs go one after another.
 #
-# Usage: scripts/run-batch.sh <label> [runs=3] [agent=claude] [arms="A B C"]
+# Usage: scripts/run-batch.sh <label> [runs=3] [agent=claude] [arms="A B C D"]
 # Example: AET_MODEL=claude-opus-5-5 scripts/run-batch.sh batch-2026-11-10 3
 #
 # Results: results/<label>/<arm>-run<n>-<agent>/  (prompt.md, transcript, report.md, meta.txt)
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-LABEL="$1"; RUNS="${2:-3}"; AGENT="${3:-claude}"; ARMS="${4:-A B C}"
+LABEL="$1"; RUNS="${2:-3}"; AGENT="${3:-claude}"; ARMS="${4:-A B C D}"
 
 [ -f "$ROOT/target/api.md" ] || "$ROOT/scripts/setup-target.sh"
 
