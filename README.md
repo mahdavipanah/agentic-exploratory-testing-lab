@@ -16,6 +16,7 @@ One target, four arms. The arms differ only in the mission the agent gets:
 | B | Four charters written by the experimenter from the docs, each with a tour | [`arms/B-human-charters.md`](arms/B-human-charters.md) |
 | C | The agent lists risks, writes its own charters, then explores them | [`arms/C-agent-charters.md`](arms/C-agent-charters.md) |
 | D | The [exploratory-testing skill](skills/exploratory-testing/) (v0), written from the pilot's lessons | [`arms/D-skill.md`](arms/D-skill.md) |
+| M | Control, not an exploration: the docs only, no API access, "predict the bugs" | [`arms/M-memory.md`](arms/M-memory.md) |
 
 The rest is the same in every arm ([`arms/shared-rules.md`](arms/shared-rules.md)):
 
@@ -31,7 +32,7 @@ Charters use Elisabeth Hendrickson's template, *Explore (target) with (resources
 
 ## Results so far
 
-**Pilot, 9 Nov 2026:** one run per arm, with Claude Opus 5.5. The answer key has 38 known problems.
+**Pilot, 9 Nov 2026:** one run per arm, with Claude Opus 5.5. The answer key has 38 known problems. The pilot was exploratory: its sessions ran as agents inside a Claude session, isolated by instruction only. The statistics we report will come from the bare-isolation batch.
 
 | Arm | Known problems reported | Noticed, incl. "questions" | False positives | Requests |
 | --- | --- | --- | --- | --- |
@@ -45,7 +46,7 @@ Charters use Elisabeth Hendrickson's template, *Explore (target) with (resources
 
 Full write-up: [`results/pilot-2026-11-09/summary.md`](results/pilot-2026-11-09/summary.md). Lessons for the skill: [`skill-notes.md`](skill-notes.md).
 
-**Next:** three runs per arm (A to D) with the `claude` CLI, where tool limits are enforced rather than requested.
+**Next:** the bare-isolation batch: three runs each of arms A to D, plus the memory check (arm M).
 
 ## The skill
 
@@ -94,31 +95,43 @@ This runs arms A to D in parallel, with a stand-in agent that sends one request.
 ### 3. Run a batch
 
 ```bash
-AET_MODEL=claude-opus-5-5 scripts/run-batch.sh batch-1 3    # arms A to D, 3 runs each: 12 sessions
+export ANTHROPIC_API_KEY=...            # bare mode authenticates only with an API key
+AET_MODEL=claude-opus-5-5 scripts/run-batch.sh batch-1 3 claude "A B C D M"
 ```
 
-Every session runs the same way:
+That's 3 runs of each arm A to D (12 exploration sessions), plus 3 runs of arm M, the memory check.
 
+Every session runs in **bare isolation**: `claude --bare` in a brand-new process, which means:
+
+- No CLAUDE.md, auto-memory, hooks, plugins, skills or keychain.
+- Settings only from an empty folder.
+- No session saved.
+- A clean environment, with nothing inherited from a parent Claude Code session.
 - A fresh target on its own port.
 - A temporary directory holding only the prompt and `api.md`.
-- Claude Code in `--safe-mode`, so none of your CLAUDE.md, skills, hooks or MCP servers apply.
-- Only three uses are permitted: `curl`, reading `api.md`, and writing `report.md`.
+- Only three uses permitted: `curl`, reading `api.md`, and writing `report.md`.
+
+No session can see another session's work or anything from your setup. `--bare` needs an API key, so usage is billed to that key's account, not your subscription.
+
+`AET_ISOLATION=safe` runs `--safe-mode` instead, which works with a subscription login. Those runs are marked `isolation=safe` and left out of the statistics by default.
 
 Each session leaves four files behind:
 
 - `prompt.md`
 - `transcript.jsonl`
 - `report.md`
-- `meta.txt`: versions, exit status, curl calls counted from the transcript, turns and cost.
+- `meta.txt`: versions, isolation mode, exit status, curl calls counted from the transcript, turns and cost.
 
 A pilot session used about 100k to 120k tokens and 5 minutes.
+
+**Arm M** gets the docs but no access to the API, and is asked to predict the bugs. If it predicts many of the 38, part of what the other arms "find" is the model remembering Restful-booker, not exploring it.
 
 To run a single session: `scripts/run-arm.sh B 2 claude 3002 batch-1`. Adapters for `codex` and `gemini` exist but are untested.
 
 ### 4. Score it
 
 ```bash
-python3 -I scripts/extract-findings.py results/batch-1 > scoring/scores-batch-1.csv
+python3 -I scripts/extract-findings.py results/batch-1 > scoring/scores-batch-1.csv   # bare runs only
 # fill in key_ids and verdict for each row (rules: scoring/README.md)
 python3 -I scripts/score.py scoring/scores-batch-1.csv 38
 ```

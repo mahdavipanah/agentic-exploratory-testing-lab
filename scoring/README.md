@@ -40,3 +40,15 @@ Start the sheet with `python3 -I scripts/extract-findings.py results/<batch> > s
 - One app, one model, few runs: an illustration, not a study.
 - Restful-booker is popular. The model may remember its bugs from training, so recall can be inflated. The docs given to agents are retitled "Booking API" to avoid naming it.
 - The experimenter wrote arm B's charters (standing in for a human) and also judges the findings.
+
+## Which runs count
+
+Statistics rest on **bare-isolation runs only** (`isolation=bare` in `meta.txt`). `extract-findings.py` skips everything else unless you pass `--all`. That excludes the pilot, which ran as agents isolated by instruction, and safe-mode runs, where auto-memory wasn't explicitly off.
+
+## Arm M (memory check)
+
+Arm M's findings are predictions, made without access to the API. Score each prediction like a finding: TP if it names a specific answer-key problem (the endpoint and the wrong behaviour), FP otherwise. Report recall only.
+
+- **What M's recall means:** how much of the answer key the model can name from memory and the docs alone. Compare it with the exploring arms' recall.
+- **The "Why" field:** each prediction says whether it came from the docs or from prior knowledge. Predictions marked "prior knowledge" that name Restful-booker bugs are direct evidence of training-data recall.
+
