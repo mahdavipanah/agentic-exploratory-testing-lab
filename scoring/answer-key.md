@@ -30,7 +30,7 @@ Built **after** arm B's charters were committed (see git history), by reading `r
 | K11 | behaviour | Negative totalprice accepted | `totalprice: -500` → 200 |
 | K12 | behaviour | Invalid dates accepted and returned garbled | `checkin: "not-a-date"` → 200, `"0NaN-aN-aN"` |
 | K13 | behaviour | Checkout before checkin accepted | checkin 2019-01-01, checkout 2018-01-01 → 200 |
-| K14 | behaviour | `depositpaid=false` sent in the documented XML or URL-encoded formats comes back `true` (any string is truthy) | URL-encoded `depositpaid=false` → `"depositpaid":true`; same for XML |
+| K14 | behaviour | `depositpaid=false` sent as text comes back `true` (any string is truthy): in the documented XML or URL-encoded formats, and as the JSON string `"false"` | URL-encoded `depositpaid=false` → `"depositpaid":true`; same for XML and for JSON `"depositpaid":"false"` |
 | K25 | behaviour | Create returns 500 when the Content-Type isn't one it handles exactly: XML with a charset, `application/xml`, `text/plain` or none (the body never becomes a booking) | `Content-Type: text/xml; charset=utf-8` → 500; `text/plain` → 500 |
 | K30 | behaviour | PUT merges instead of replacing: an omitted optional field keeps its old value | PUT without additionalneeds → old "Breakfast" still returned |
 
@@ -83,11 +83,19 @@ Each was reproduced on a fresh server after the pilot. None was on the source-re
 | K37 | contract | Docs: booking id is typed String for GET and Number everywhere else | URL parameter tables | C, as a question |
 | K38 | contract | Docs: Content-Type rows list only JSON and XML, yet the examples send URL-encoded bodies | POST, PUT and PATCH header tables | C, as a question |
 
+## Added from batch-1 (`run`)
+
+| ID | Type | Problem | Reproduction (observed) | First reported by |
+| --- | --- | --- | --- | --- |
+| K39 | behaviour | A date sent with a time and a UTC offset is accepted and converted to the UTC calendar date, so the stay moves (here on a UTC server) | checkin `2024-12-31T22:00:00-03:00` → `2025-01-01`; checkout `2025-01-05T08:00:00+10:00` → `2025-01-04` | batch-1 D-run1 F12 |
+
+**Change to K14 after batch-1:** widened to include the JSON string `"false"`, after A-run3 F6 reported only that form. Same cause (any string is truthy), same symptom.
+
 **Change to K25 after the pilot:** widened from "XML with a charset or `application/xml`" to any Content-Type the server doesn't handle exactly, after C F9 showed `text/plain` and no Content-Type fail the same way. The root cause is the same: the body never becomes a booking.
 
 ## Ceiling
 
-**38 items**: 30 from source review (K01 to K30) and 8 from runs (K31 to K38).
+**39 items**: 30 from source review (K01 to K30), 8 from the pilot runs (K31 to K38) and 1 from batch-1 (K39).
 
 ## Environment-dependent (not in the ceiling)
 

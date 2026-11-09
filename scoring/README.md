@@ -33,7 +33,13 @@ Per run, record:
 - **Precision** = TP / (TP + FP)
 - **Requests used** and **minutes**, from the report and `meta.txt`
 
-Start the sheet with `python3 -I scripts/extract-findings.py results/<batch> > scoring/scores-<batch>.csv`, which writes one row per finding or question. Columns: `run, section (finding|question), item, title, key_ids (;-separated), verdict, note`. Then compute the table with `python3 -I scripts/score.py scoring/scores-<batch>.csv <ceiling>` and write the batch's `summary.md`.
+Start with `python3 -I scripts/extract-findings.py results/<batch> > /tmp/sheet.csv`, which writes one row per finding or question. Columns: `run, section (finding|question), item, title, key_ids (;-separated), verdict, note`.
+
+Record the matching in `scoring/map-<batch>.txt`, one line per row: `<run> <item> <key ids | - | FP> [| note]`. Write a note for every judgement call. `python3 -I scripts/apply-map.py /tmp/sheet.csv scoring/map-<batch>.txt > scoring/scores-<batch>.csv` fills the sheet. It computes TP and DUP in report order and refuses to run if any row is unmapped.
+
+Then compute the table with `python3 -I scripts/score.py scoring/scores-<batch>.csv <ceiling> --schedule results/<batch>/schedule.txt` and write the batch's `summary.md`.
+
+**Compound findings.** Agents often lump problems together, as in "Invalid dates are accepted and silently changed". Match on the title, not the body: a body may show more than the title claims. A title that names two problems ("negative price and checkout before checkin") claims both.
 
 ## Caveats to report with any result
 
@@ -56,6 +62,9 @@ Check the memory audit before trusting a batch. `login_home_memory_changes` and 
 ## Arm M (memory check)
 
 Arm M's findings are predictions, made without access to the API. Score each prediction like a finding: TP if it names a specific answer-key problem (the endpoint and the wrong behaviour), FP otherwise. Report recall only.
+
+- **Hedged predictions.** A hedge counts if the title commits to the key's behaviour among a few named outcomes ("returns 500 or ignores the filter"). "Is not rejected", with no committed outcome, is FP.
+- **Real but outside the key.** A prediction of real behaviour the key doesn't include (403 instead of 401) is FP here too, because M is scored for recall only.
 
 - **What M's recall means:** how much of the answer key the model can name from memory and the docs alone. Compare it with the exploring arms' recall.
 - **The "Why" field:** each prediction says whether it came from the docs or from prior knowledge. Predictions marked "prior knowledge" that name Restful-booker bugs are direct evidence of training-data recall.

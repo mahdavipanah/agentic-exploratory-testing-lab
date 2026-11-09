@@ -140,7 +140,9 @@ def k14():
             "bookingdates[checkin]": "2018-01-01", "bookingdates[checkout]": "2018-01-02"}
     s, _, t = req("POST", "/booking", body, form=True)
     dp = (js(t) or {}).get("booking", {}).get("depositpaid")
-    return s == 200 and dp is True, f"urlencoded depositpaid=false -> {dp}"
+    s2, b2 = create(depositpaid="false")
+    dp2 = b2["booking"]["depositpaid"]
+    return s == 200 and dp is True and s2 == 200 and dp2 is True, f"urlencoded depositpaid=false -> {dp}; JSON \"false\" -> {dp2}"
 
 def k15():
     _, b = create(lastname="KeyCheckin", bookingdates={"checkin": "2030-01-10", "checkout": "2030-01-20"})
@@ -264,8 +266,13 @@ def k37():
 def k38():
     return "Can be application/json or text/xml" in API_MD and "application/x-www-form-urlencoded" in API_MD, "Content-Type rows omit urlencoded; examples use it"
 
+def k39():
+    s, b = create(bookingdates={"checkin": "2024-12-31T22:00:00-03:00", "checkout": "2025-01-05T08:00:00+10:00"})
+    d = b["booking"]["bookingdates"]
+    return s == 200 and d == {"checkin": "2025-01-01", "checkout": "2025-01-04"}, f"2024-12-31T22:00-03:00 / 2025-01-05T08:00+10:00 -> {s}, {d['checkin']} / {d['checkout']}"
 
-CHECKS = [(f"K{i:02d}", globals()[f"k{i:02d}"]) for i in range(1, 39)]
+
+CHECKS = [(f"K{i:02d}", globals()[f"k{i:02d}"]) for i in range(1, 40)]
 
 
 def main():

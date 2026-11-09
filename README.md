@@ -32,21 +32,26 @@ Charters use Elisabeth Hendrickson's template, *Explore (target) with (resources
 
 ## Results so far
 
-**Pilot, 9 Nov 2026:** one run per arm, with Claude Opus 5.5. The answer key has 38 known problems. The pilot was exploratory: its sessions ran as agents inside a Claude session, isolated by instruction only. The statistics we report will come from the isolated batch: 5 runs per arm, each in its own isolated session.
+**batch-1, 9 Nov 2026:** 5 isolated runs of each arm, 25 sessions in a shuffled order, Claude Opus 5.5 (`claude-opus-5-5`). Scored against the 39 known problems in the answer key.
 
-| Arm | Known problems reported | Noticed, incl. "questions" | False positives | Requests |
+| Arm | Recall, findings (mean, range) | Noticed, incl. questions | False positives | Requests |
 | --- | --- | --- | --- | --- |
-| A, no mission | 9 (24%) | 12 (32%) | 0 | 62 of 80 |
-| B, experimenter's charters | 18 (47%) | 26 (68%) | 0 | 80 of 80 |
-| C, agent's own charters | 20 (53%) | 27 (71%) | 0 | 80 of 80 |
+| A, no mission | 35% (33–38%) | 46% | 0 of 62 | 66 |
+| B, experimenter's charters | 46% (44–49%) | 62% | 0 of 82 | 80 |
+| C, agent's own charters | 39% (18–49%) | 50% | 0 of 58 | 65 |
+| D, the skill | 48% (38–59%) | 55% | 0 of 78 | 76 |
+| M, docs only, no API | 51% (49–56%) | 51% | 51 of 161 predictions don't match | 0 |
 
-- **A written mission roughly doubled the find rate,** and agent-written missions did as well as the experimenter's. With one run per arm, B and C are indistinguishable.
-- **Exploration and source review found different bugs.** The runs found 4 bugs that reading the source missed. Reading the source found 8 that no run noticed, including the worst one.
-- **What the agents got wrong points at what the skill must teach:** repeat each probe on every write path, test both sides of a boundary, and don't take the docs as the only oracle.
+- **A mission helps.** B and D beat A: p = 0.008 and 0.016 (exact permutation test). C is not distinguishable from A: four C runs scored 36–49%, but one stopped at 37 of 80 requests and scored 18%.
+- **The skill matches human charters, and finds different bugs.** One of them, re-keying a booking through `bookingid`, appeared in 4 of 5 D runs and nowhere else. The skill was written after the pilot on this same app, so this is not a test of how it generalizes.
+- **Memory alone scores as high as exploring.** Arm M, docs only, recognized Restful-booker in all five runs. For much of the key, recall here can't separate exploring from remembering. Nine items were found only by exploring; they show up only when you run the system and watch its responses and state.
+- **No sign of carry-over** between sessions: Spearman rho = +0.22, p = 0.29.
 
-Full write-up: [`results/pilot-2026-11-09/summary.md`](results/pilot-2026-11-09/summary.md). Lessons for the skill: [`skill-notes.md`](skill-notes.md).
+Full write-up: [`results/batch-1/summary.md`](results/batch-1/summary.md). One harness bug affected this batch and was repaired from the transcripts; see [`results/batch-1/README.md`](results/batch-1/README.md).
 
-**Next:** the isolated batch: 5 runs each of arms A to D plus the memory check (arm M), in a shuffled order with a carry-over check.
+**Pilot (earlier the same day):** one run per arm, isolated by instruction only. Rescored against 39 items: A 23%, B 46%, C 51%. With one run, C looked at least as good as B. Five runs show C is the least reliable. See [`results/pilot-2026-11-09/summary.md`](results/pilot-2026-11-09/summary.md). Lessons for the skill: [`skill-notes.md`](skill-notes.md).
+
+**Next:** skill v0.2 from batch-1's lessons, then a target the skill has never seen.
 
 ## The skill
 
@@ -79,10 +84,10 @@ Tested on Linux with Node 22, Python 3.13 and Claude Code 2.1.319. The scripts n
 git clone https://github.com/mahdavipanah/agentic-exploratory-testing-lab
 cd agentic-exploratory-testing-lab
 scripts/setup-target.sh                   # Restful-booker at the pinned commit, plus target/api.md
-python3 -I scripts/verify-answer-key.py   # replays all 38 known problems on a fresh server (spoilers)
+python3 -I scripts/verify-answer-key.py   # replays all 39 known problems on a fresh server (spoilers)
 ```
 
-The last line should read `38 of 38 items reproduced.` The output from our machine is in [`scoring/answer-key-verification.md`](scoring/answer-key-verification.md).
+The last line should read `39 of 39 items reproduced.` The output from our machine is in [`scoring/answer-key-verification.md`](scoring/answer-key-verification.md).
 
 ### 2. Check the pipeline without an LLM
 
@@ -144,21 +149,22 @@ Each session leaves its files in `results/<batch>/<arm>-run<n>-claude/`:
 - `prompt.md`
 - `transcript.jsonl`
 - `report.md`
-- `meta.txt`: versions, isolation mode, run order, exit status, memory audit, curl calls counted from the transcript, turns and cost.
+- `meta.txt`: versions, model, isolation mode, run order, exit status, memory audit, curl calls from the transcript, turns, cost, and `report_source` (`file`, or `transcript` if the report had to be rebuilt).
 
-**Arm M** gets the docs but no access to the API, and is asked to predict the bugs. If it predicts many of the 38, part of what the other arms "find" is the model remembering Restful-booker, not exploring it.
+**Arm M** gets the docs but no access to the API, and is asked to predict the bugs. If it predicts many of the 39, part of what the other arms "find" is the model remembering Restful-booker, not exploring it.
 
 To run a single session: `scripts/run-arm.sh B 2 claude 3002 batch-1`. Adapters for `codex` and `gemini` exist but are untested.
 
 ### 4. Score it
 
 ```bash
-python3 -I scripts/extract-findings.py results/batch-1 > scoring/scores-batch-1.csv   # isolated runs only
-# fill in key_ids and verdict for each row (rules: scoring/README.md)
-python3 -I scripts/score.py scoring/scores-batch-1.csv 38 --schedule results/batch-1/schedule.txt
+python3 -I scripts/extract-findings.py results/batch-2 > /tmp/sheet.csv   # isolated runs only
+# write scoring/map-batch-2.txt: one line per finding or question (rules: scoring/README.md)
+python3 -I scripts/apply-map.py /tmp/sheet.csv scoring/map-batch-2.txt > scoring/scores-batch-2.csv
+python3 -I scripts/score.py scoring/scores-batch-2.csv 39 --schedule results/batch-2/schedule.txt
 ```
 
-Matching a finding to the answer key is a human judgment, on purpose: the filled-in CSV is the audit trail. A new, confirmed problem becomes a new K item in the answer key, and the ceiling grows.
+Matching a finding to the answer key is a human judgment, on purpose. The map file is the audit trail: it says which key items each finding claims, with a note on every judgement call. `apply-map.py` computes the TP and DUP verdicts from it and fails if any finding is left unmapped. A new, confirmed problem becomes a new K item in the answer key, and the ceiling grows.
 
 `score.py` prints:
 

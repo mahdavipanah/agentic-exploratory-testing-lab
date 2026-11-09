@@ -38,3 +38,30 @@ The lessons above are now [`skills/exploratory-testing`](skills/exploratory-test
 - **Known bias:** the rules themselves come from this target's misses, so arm D on Restful-booker measures whether the lessons were applied, not generalization. Next: a held-out target the skill has never seen, such as a small API with bugs planted by someone else.
 - **Report format:** findings carry `Kind: bug | needs a decision`, and Questions holds only unconfirmed suspicions. Expect D's recall from findings to rise for that reason alone; compare arms on "noticed" recall too.
 
+
+## Lessons from batch-1 (9 Nov 2026)
+
+From `results/batch-1/summary.md` (5 isolated runs per arm):
+
+1. **Use the whole budget.** One self-chartered run (C-run1) wrote five good charters, used 37 of 80 requests and stopped at 18% recall. The other four C runs scored 36–49%. Rule for v0.2: when the charters finish with budget left, add a charter for the area with the thinnest coverage, rather than stopping.
+2. **"Works for valid input" is not done.** C-run1 called the date filters correct after one valid query each, and missed both filter bugs. The boundary rule needs to be stronger: test the boundary value itself and the opposite direction before calling anything correct.
+3. **The rules that only D followed found what only D found.**
+   - "Include server-owned fields such as ids, on every write path" found `bookingid` re-keying in 4 of 5 D runs, and in no other arm.
+   - "Behaviour that matches wrong docs is still a finding" moved the 201 status codes from Questions into Findings.
+   - The timezone item in the familiar-problems oracle found a new key item (K39).
+
+   Keep all three.
+4. **Memory is a weak oracle; evidence is the strong one.** With docs and no API, the model named Restful-booker in every run and predicted half the key. But 32% of its predictions matched nothing in the key, and some were plainly wrong. The exploring arms had 0 false positives in 280 findings, because every finding needed a command and its output. Rule to keep: if you recognise the system, use that to choose what to probe, never as evidence.
+5. **What only exploring finds is what the skill is for.** These come from watching responses and state, not from reading:
+   - an error message returned with 200
+   - XML labelled as HTML
+   - dates that roll over
+   - records broken by an earlier write
+   - a timezone shift
+
+   The skill should push agents toward reading back every write in every representation, and inspecting headers as well as bodies.
+
+## Lessons from building the harness (batch-1)
+
+- **A check that passed by luck, again.** The smoke test passed because its agent happened to retry a refused write with a different spelling of the same path. In the batch, 11 of 25 agents didn't retry. The fixed smoke test checks the outcome that matters: the agent saved the report itself.
+- **Same thing, two names.** On macOS, `/var/...` and `/private/var/...` are the same folder, but the permission check sees only one of them. For an explorer: when something is refused or missing, check whether you used the name the system resolves to, not just a name that points there.

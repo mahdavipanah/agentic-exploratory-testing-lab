@@ -1,6 +1,9 @@
 """Compute recall per run and per arm from a filled-in score sheet, with simple statistics.
 
-Usage: python3 -I scripts/score.py scoring/scores-<batch>.csv 38 [--schedule results/<batch>/schedule.txt]
+Usage: python3 -I scripts/score.py scoring/scores-<batch>.csv 39 [--schedule results/<batch>/schedule.txt]
+                                 [--only K04,K20,...] [--arms A,B,C,D]
+
+--only restricts scoring to the listed key items (the ceiling becomes their number); --arms keeps only those arms.
 
 Rows with section=finding count toward "findings" recall; section=question rows count only toward
 "noticed". A run's arm is the first letter of its run id (A, B, C, D, M).
@@ -24,13 +27,28 @@ if "--schedule" in args:
     i = args.index("--schedule")
     schedule_path = args[i + 1]
     del args[i:i + 2]
+only = arms_keep = None
+if "--only" in args:
+    i = args.index("--only")
+    only = set(args[i + 1].split(","))
+    del args[i:i + 2]
+if "--arms" in args:
+    i = args.index("--arms")
+    arms_keep = set(args[i + 1].split(","))
+    del args[i:i + 2]
 path, ceiling = args[0], int(args[1])
+if only:
+    ceiling = len(only)
 
 strict, noticed = defaultdict(set), defaultdict(set)
 counts = defaultdict(lambda: {"TP": 0, "FP": 0, "DUP": 0, "": 0})
 unscored = 0
 for row in csv.DictReader(open(path)):
     run, keys = row["run"], [k.strip() for k in row["key_ids"].split(";") if k.strip()]
+    if arms_keep and run[0] not in arms_keep:
+        continue
+    if only:
+        keys = [k for k in keys if k in only]
     if row["section"] == "finding":
         verdict = row["verdict"].strip()
         counts[run][verdict if verdict in ("TP", "FP", "DUP") else ""] += 1
@@ -152,7 +170,7 @@ if multi:
                        else "no sign that later sessions did better")
             print(f"\nSpearman rho = {rho:+.2f}, permutation p = {p:.3f}: {verdict}.")
 
-allk = {f"K{i:02d}" for i in range(1, ceiling + 1)}
+allk = only or {f"K{i:02d}" for i in range(1, ceiling + 1)}
 print("\nNever noticed by any run:", ", ".join(sorted(allk - un)) or "none")
 print("Only in questions, never in findings:", ", ".join(sorted(un - us)) or "none")
 if unscored:
