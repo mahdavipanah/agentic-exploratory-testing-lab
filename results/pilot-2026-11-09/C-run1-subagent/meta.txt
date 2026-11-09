@@ -1,0 +1,9 @@
+arm=C
+run=1
+agent=claude subagent (Opus 5.5, general-purpose)
+port=3003
+requests=80 of 80
+tool_uses=29
+subagent_tokens=110070
+seconds=295
+note=report returned as text (subagents cannot write files); saved verbatim by the orchestrator

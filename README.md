@@ -47,5 +47,7 @@ skill-notes.md   what each experiment teaches for the skill
 ## Status
 
 - Harness: done.
-- Pilot (one run per arm, run as isolated agents inside a Claude session): see `results/pilot-2026-11-09/`.
-- Full batch (three runs per arm, `claude` CLI): not yet run.
+- **Pilot, 9 Nov 2026** (one run per arm, Claude Opus 5.5 subagents): out of a 38-item ceiling, A found 9, B 18 and C 20, with zero false positives. See [`results/pilot-2026-11-09/summary.md`](results/pilot-2026-11-09/summary.md).
+- Full batch (three runs per arm, `claude` CLI with enforced tool limits): not yet run.
+
+Score a batch: `python3 -I scripts/score.py scoring/scores-<batch>.csv 38`

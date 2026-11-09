@@ -1,0 +1,55 @@
+run,section,item,title,key_ids,verdict,note
+A,finding,F1,POST returns 500 when a required field is missing,K03,TP,
+A,finding,F2,depositpaid stored true via XML or urlencoded,K14,TP,
+A,finding,F3,PATCH of one nested date destroys the other,K22,TP,
+A,finding,F4,Invalid date strings accepted and stored as 0NaN-aN-aN,K12,TP,
+A,finding,F5,checkin filter is exclusive,K15,TP,Also concluded the checkout filter is correct (inclusive); it is inverted (K16). One boundary probe only.
+A,finding,F6,Non-numeric totalprice stored as null,K09,TP,
+A,finding,F7,PUT/PATCH/DELETE on unknown id return 405,K06,TP,
+A,finding,F8,/ping returns 201,K01,TP,
+A,finding,F9,POST /auth with bad credentials returns 200,K07,TP,
+A,question,Q1,Corrupt-date bookings appear in every date filter,K34,,Flagged as suspected only
+A,question,Q2,DELETE returns 201,K05,,Judged not a defect because it matches the docs example
+A,question,Q3,PATCH examples use -X PUT,K29,,
+B,finding,F1,depositpaid false stored as true (XML / urlencoded / JSON string),K14,TP,
+B,finding,F2,PATCH with one date erases the other,K22,TP,
+B,finding,F3,Invalid dates accepted; impossible dates roll over,K12;K33,TP,Title names both problems
+B,finding,F4,Checkout before checkin accepted,K13,TP,
+B,finding,F5,Negative totalprice accepted,K11,TP,
+B,finding,F6,Non-numeric totalprice saved as NaN (JSON null / XML NaN),K09,TP,
+B,finding,F7,Decimal totalprice truncated,K08,TP,
+B,finding,F8,Accept urlencoded returns 200 with error text; write still happens,K31,TP,
+B,finding,F9,POST 500 for missing fields or application/xml Content-Type,K03;K25,TP,Title names both problems
+B,finding,F10,PUT/PATCH/DELETE on missing id return 405,K06,TP,
+B,finding,F11,checkin filter excludes same-day bookings and includes invalid-date booking,K15;K34,TP,Title names both problems
+B,finding,F12,checkout filter returns earlier checkouts,K16,TP,
+B,finding,F13,POST /auth wrong credentials returns 200,K07,TP,
+B,finding,F14,XML responses sent as text/html,K32,TP,
+B,finding,F15,Unsupported Accept returns 418,K19,TP,
+B,question,Q1,Name search is case-sensitive; docs example lowercase,K18,,
+B,question,Q2,DELETE and /ping return 201,K05;K01,,
+B,question,Q3,PATCH examples use -X PUT,K29,,
+B,question,Q4,additionalneeds documented required but optional,K35,,
+B,question,Q5,Empty firstname accepted on POST; null firstname on PATCH,K10;K21,,
+B,question,Q6,Several wrong types together return 500,K04,,
+C,finding,F1,PATCH with one date wipes the other,K22,TP,
+C,finding,F2,depositpaid "false" and "no" stored as true,K14,TP,
+C,finding,F3,Invalid dates accepted as 0NaN-aN-aN,K12,TP,
+C,finding,F4,Impossible dates roll over,K33,TP,
+C,finding,F5,Decimal totalprice truncated,K08,TP,
+C,finding,F6,Non-numeric totalprice stored as null,K09,TP,
+C,finding,F7,Negative prices and reversed dates accepted,K11;K13,TP,Title names both problems
+C,finding,F8,POST missing field or wrong-typed name returns 500,K03;K04,TP,Title names both problems
+C,finding,F9,POST with missing or unsupported Content-Type returns 500,K25,TP,K25 widened after the pilot to cover this; see answer key
+C,finding,F10,Malformed date in filter returns 500,K17,TP,
+C,finding,F11,checkin filter excludes same-day bookings,K15,TP,
+C,finding,F12,checkout filter returns earlier checkouts,K16,TP,
+C,finding,F13,Corrupted-checkin bookings match every checkin filter,K34,TP,
+C,finding,F14,Accept urlencoded returns 200 with internal error,K31,TP,
+C,finding,F15,XML responses sent as text/html,K32,TP,
+C,finding,F16,PUT/PATCH/DELETE on missing id return 405,K06,TP,
+C,finding,F17,POST /auth bad credentials returns 200,K07,TP,
+C,finding,F18,DELETE returns 201,K05,TP,Mentions /ping 201 in the body but not the title; not credited for K01 here
+C,question,Q1,Name filters case-sensitive,K18,,
+C,question,Q6,additionalneeds documented required but optional,K35,,
+C,question,Q7,Docs problems: PATCH uses PUT; garbled Authorization row; id String vs Number; Content-Type rows omit urlencoded; /ping 200 vs 201,K29;K36;K37;K38;K01,,

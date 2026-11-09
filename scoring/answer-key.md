@@ -29,7 +29,7 @@ Built **after** arm B's charters were committed (see git history), by reading `r
 | K12 | behaviour | Invalid dates accepted and returned garbled | `checkin: "not-a-date"` → 200, `"0NaN-aN-aN"` |
 | K13 | behaviour | Checkout before checkin accepted | checkin 2019-01-01, checkout 2018-01-01 → 200 |
 | K14 | behaviour | `depositpaid=false` sent in the documented XML or URL-encoded formats comes back `true` (any string is truthy) | URL-encoded `depositpaid=false` → `"depositpaid":true`; same for XML |
-| K25 | behaviour | XML is only parsed when Content-Type is exactly `text/xml`; with a charset or as `application/xml` the create fails with 500 | `Content-Type: text/xml; charset=utf-8` → 500 |
+| K25 | behaviour | Create returns 500 when the Content-Type isn't one it handles exactly: XML with a charset, `application/xml`, `text/plain` or none (the body never becomes a booking) | `Content-Type: text/xml; charset=utf-8` → 500; `text/plain` → 500 |
 | K30 | behaviour | PUT merges instead of replacing: an omitted optional field keeps its old value | PUT without additionalneeds → old "Breakfast" still returned |
 
 ## Partial update (PATCH)
@@ -66,9 +66,23 @@ Built **after** arm B's charters were committed (see git history), by reading `r
 | K28 | contract | DELETE is documented with a literal path `/booking/1` | DeleteBooking heading |
 | K29 | contract | PATCH examples use `curl -X PUT` with a partial body, which fails with 400 | PartialUpdateBooking examples |
 
+## Added from the pilot runs (`run`)
+
+Each was reproduced on a fresh server after the pilot. None was on the source-review list. K31 sits on a line of code the source review read and passed over.
+
+| ID | Type | Problem | Reproduction (observed) | First reported by |
+| --- | --- | --- | --- | --- |
+| K31 | behaviour | The documented `Accept: application/x-www-form-urlencoded` returns 200 with the body `formurlencoded is not a function`; writes still apply | `GET /booking/1` with that Accept → 200, text/html, error text | B F8, C F14 |
+| K32 | contract | XML responses are sent with `Content-Type: text/html` | `GET /booking/1` with `Accept: application/xml` → text/html | B F14, C F15 |
+| K33 | behaviour | Impossible calendar dates roll over silently | checkin `2026-02-30` stored as `2026-03-02` | B F3, C F4 |
+| K34 | behaviour | A booking with an unparseable stored date matches every checkin filter | `checkin: "not-a-date"`, then `?checkin=2099-01-01` returns it | B F11, C F13 (A as a question) |
+| K35 | contract | additionalneeds is documented as required ("Optional: no") but can be omitted | `POST /booking` without it → 200 | B and C, as questions |
+| K36 | contract | Docs: the Authorization header row is garbled (`YWRtaW46cGFzc3dvcmQxMjM=]`) | PUT, PATCH and DELETE header tables | C, as a question |
+| K37 | contract | Docs: booking id is typed String for GET and Number everywhere else | URL parameter tables | C, as a question |
+| K38 | contract | Docs: Content-Type rows list only JSON and XML, yet the examples send URL-encoded bodies | POST, PUT and PATCH header tables | C, as a question |
+
+**Change to K25 after the pilot:** widened from "XML with a charset or `application/xml`" to any Content-Type the server doesn't handle exactly, after C F9 showed `text/plain` and no Content-Type fail the same way. The root cause is the same: the body never becomes a booking.
+
 ## Ceiling
 
-30 items from source review (K01 to K30). Run finds are added below as `run` items.
-
-| ID | Type | Problem | Found by |
-| --- | --- | --- | --- |
+**38 items**: 30 from source review (K01 to K30) and 8 from runs (K31 to K38).
