@@ -32,7 +32,7 @@ Charters use Elisabeth Hendrickson's template, *Explore (target) with (resources
 
 ## Results so far
 
-**Pilot, 9 Nov 2026:** one run per arm, with Claude Opus 5.5. The answer key has 38 known problems. The pilot was exploratory: its sessions ran as agents inside a Claude session, isolated by instruction only. The statistics we report will come from the bare-isolation batch.
+**Pilot, 9 Nov 2026:** one run per arm, with Claude Opus 5.5. The answer key has 38 known problems. The pilot was exploratory: its sessions ran as agents inside a Claude session, isolated by instruction only. The statistics we report will come from the isolated batch (fresh isolation, 5 runs per arm).
 
 | Arm | Known problems reported | Noticed, incl. "questions" | False positives | Requests |
 | --- | --- | --- | --- | --- |
@@ -46,7 +46,7 @@ Charters use Elisabeth Hendrickson's template, *Explore (target) with (resources
 
 Full write-up: [`results/pilot-2026-11-09/summary.md`](results/pilot-2026-11-09/summary.md). Lessons for the skill: [`skill-notes.md`](skill-notes.md).
 
-**Next:** the bare-isolation batch: three runs each of arms A to D, plus the memory check (arm M).
+**Next:** the isolated batch: 5 runs each of arms A to D plus the memory check (arm M), in a shuffled order with a carry-over check.
 
 ## The skill
 
@@ -94,35 +94,55 @@ This runs arms A to D in parallel, with a stand-in agent that sends one request.
 
 ### 3. Run a batch
 
+Create a subscription token once, and keep it in your terminal. It's a secret, like a password.
+
 ```bash
-export ANTHROPIC_API_KEY=...            # bare mode authenticates only with an API key
-AET_MODEL=claude-opus-5-5 scripts/run-batch.sh batch-1 3 claude "A B C D M"
+claude setup-token
+export CLAUDE_CODE_OAUTH_TOKEN=...
 ```
 
-That's 3 runs of each arm A to D (12 exploration sessions), plus 3 runs of arm M, the memory check.
+First, run one real session to check your setup (about 5 minutes):
 
-Every session runs in **bare isolation**: `claude --bare` in a brand-new process, which means:
+```bash
+scripts/run-arm.sh A 0 claude 3001 smoke && cat results/smoke/A-run0-claude/meta.txt
+```
 
-- No CLAUDE.md, auto-memory, hooks, plugins, skills or keychain.
-- Settings only from an empty folder.
-- No session saved.
-- A clean environment, with nothing inherited from a parent Claude Code session.
-- A fresh target on its own port.
-- A temporary directory holding only the prompt and `api.md`.
-- Only three uses permitted: `curl`, reading `api.md`, and writing `report.md`.
+Expect `agent_exit=0`, `isolation=fresh` and `fresh_home_memory_files=0`, plus a `report.md` with findings. Then run the batch:
 
-No session can see another session's work or anything from your setup. `--bare` needs an API key, so usage is billed to that key's account, not your subscription.
+```bash
+AET_MODEL=claude-opus-5-5 scripts/run-batch.sh batch-1 5 claude "A B C D M"
+```
 
-`AET_ISOLATION=safe` runs `--safe-mode` instead, which works with a subscription login. Those runs are marked `isolation=safe` and left out of the statistics by default.
+That's 25 sessions: 5 runs of each exploring arm A to D, plus 5 of the memory check M. They run in a shuffled order, 4 at a time. A pilot session used about 100k to 120k tokens and 5 minutes, so expect around 2 million tokens and roughly 40 minutes. Subscription usage limits may slow it down.
 
-Each session leaves four files behind:
+To add more runs to the same batch later:
+
+```bash
+AET_RUN_START=6 scripts/run-batch.sh batch-1 3 claude "A B C D M"
+```
+
+**Why 5 runs per arm:** with 3 runs each, even a perfect gap between two arms can't reach p < 0.05; the smallest possible p is 0.1. With 5 runs each, the floor is 0.008.
+
+**How runs are kept apart.** By default, every session runs in **fresh isolation**:
+
+- It gets a brand-new, empty Claude Code home (`CLAUDE_CONFIG_DIR`), deleted when the session ends. The names of the files it wrote are kept in `fresh-home-files.txt` as an audit.
+- Auto-memory is switched off (`CLAUDE_CODE_DISABLE_AUTO_MEMORY=1`), and Claude Code runs in `--safe-mode`, so none of your CLAUDE.md, skills, hooks or plugins apply.
+- It starts with a clean environment, with nothing inherited from a parent Claude Code session.
+- It reads settings only from an empty folder.
+- It gets a fresh target on its own port.
+- It gets a temporary directory holding only the prompt and `api.md`.
+- It may only use `curl`, read `api.md`, and write `report.md`.
+
+Alternatives: `AET_ISOLATION=bare` uses `claude --bare` and needs `ANTHROPIC_API_KEY`. `AET_ISOLATION=safe` uses your normal Claude Code home; those runs are left out of the statistics.
+
+**Carry-over check.** Because the order is shuffled, `score.py` can test whether sessions that ran later did better than their arm's average. If runs leaked into each other, later ones would score higher. The schedule and its seed are in `results/<batch>/schedule.txt`.
+
+Each session leaves its files in `results/<batch>/<arm>-run<n>-claude/`:
 
 - `prompt.md`
 - `transcript.jsonl`
 - `report.md`
-- `meta.txt`: versions, isolation mode, exit status, curl calls counted from the transcript, turns and cost.
-
-A pilot session used about 100k to 120k tokens and 5 minutes.
+- `meta.txt`: versions, isolation mode, run order, exit status, curl calls counted from the transcript, turns and cost.
 
 **Arm M** gets the docs but no access to the API, and is asked to predict the bugs. If it predicts many of the 38, part of what the other arms "find" is the model remembering Restful-booker, not exploring it.
 
@@ -131,12 +151,19 @@ To run a single session: `scripts/run-arm.sh B 2 claude 3002 batch-1`. Adapters 
 ### 4. Score it
 
 ```bash
-python3 -I scripts/extract-findings.py results/batch-1 > scoring/scores-batch-1.csv   # bare runs only
+python3 -I scripts/extract-findings.py results/batch-1 > scoring/scores-batch-1.csv   # isolated runs only
 # fill in key_ids and verdict for each row (rules: scoring/README.md)
-python3 -I scripts/score.py scoring/scores-batch-1.csv 38
+python3 -I scripts/score.py scoring/scores-batch-1.csv 38 --schedule results/batch-1/schedule.txt
 ```
 
 Matching a finding to the answer key is a human judgment, on purpose: the filled-in CSV is the audit trail. A new, confirmed problem becomes a new K item in the answer key, and the ceiling grows.
+
+`score.py` prints:
+
+- Recall per run.
+- Per-arm mean, standard deviation and range.
+- Pairwise permutation tests between arms (exact for small samples, and they don't assume normal data).
+- The carry-over check.
 
 ### How the pilot differs
 

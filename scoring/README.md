@@ -43,7 +43,13 @@ Start the sheet with `python3 -I scripts/extract-findings.py results/<batch> > s
 
 ## Which runs count
 
-Statistics rest on **bare-isolation runs only** (`isolation=bare` in `meta.txt`). `extract-findings.py` skips everything else unless you pass `--all`. That excludes the pilot, which ran as agents isolated by instruction, and safe-mode runs, where auto-memory wasn't explicitly off.
+Statistics rest on **isolated runs only**: `isolation=fresh` (the default) or `isolation=bare` in `meta.txt`. `extract-findings.py` skips everything else unless you pass `--all`. That excludes the pilot, which ran as agents isolated by instruction, and safe-mode runs, which used your normal Claude Code home.
+
+## Statistics
+
+- **Per arm:** mean, standard deviation and range of recall across runs.
+- **Between arms:** a two-sided permutation test on the difference in mean findings recall. It is exact while every split of the pooled runs can be listed, and otherwise uses 20,000 random shuffles. With n runs per arm the smallest possible p is 2 / C(2n, n): 0.1 for 3 runs, 0.008 for 5. The output flags comparisons that can't reach 0.05.
+- **Carry-over check** (needs `--schedule`): the Spearman correlation between the order sessions ran in and each session's recall minus its arm's mean, with a permutation p-value. A positive, significant correlation would mean later sessions did better, which is a sign of leakage between runs. Tested on made-up data: rho = +0.02 (p = 0.93) without leakage, and rho = +0.77 (p < 0.001) with leakage added.
 
 ## Arm M (memory check)
 

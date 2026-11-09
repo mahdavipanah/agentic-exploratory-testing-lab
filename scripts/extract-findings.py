@@ -6,8 +6,9 @@ One row per finding (### F<n>: ...) and per top-level question bullet. Fill in k
 Usage: python3 -I scripts/extract-findings.py results/<label> [--all] > scoring/scores-<label>.csv
 The run id is the run folder name, e.g. "B-run2-claude"; its first letter is the arm.
 
-Only runs with isolation=bare in their meta.txt are included, because those are the runs statistics
-should rest on. Pass --all to include the rest (pilot, safe-mode and dry runs); skipped runs are listed on stderr.
+Only runs with isolation=fresh or isolation=bare in their meta.txt are included, because those are the
+runs statistics should rest on. Pass --all to include the rest (pilot, safe-mode and dry runs); skipped
+runs are listed on stderr.
 """
 import csv
 import os
@@ -60,7 +61,7 @@ def main(batch_dir, include_all):
         if not os.path.isfile(report):
             continue
         iso = isolation(os.path.join(batch_dir, run))
-        if iso != "bare" and not include_all:
+        if iso not in ("fresh", "bare") and not include_all:
             print(f"skipped {run}: isolation={iso} (use --all to include)", file=sys.stderr)
             continue
         s = sections(open(report).read())
