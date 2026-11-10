@@ -31,7 +31,7 @@ From the pilot (`results/pilot-2026-11-09/summary.md`):
 
 ## Skill v0 (9 Nov 2026)
 
-The lessons above are now [`skills/exploratory-testing`](skills/exploratory-testing/), in the open Agent Skills format, and run as arm D.
+The lessons above are now [`skills/exploratory-testing`](../skills/exploratory-testing/), in the open Agent Skills format, and run as arm D.
 
 - **Where each lesson went:** the environment check is under "Before you start". Risks before endpoints, charters and budgets are workflow steps 2 and 3. Repeating probes on every path, both sides of a boundary, reading back after a write and several oracles are the rules in step 4. The three report buckets are step 6.
 - **Kept generic on purpose.** The oracle and tour examples were rewritten so they don't mirror Restful-booker's bugs. The first draft quoted several (`false` stored as true, a price losing its cents) and would have leaked the answer key into arm D.
@@ -80,7 +80,7 @@ Unchanged: the rules behind D's distinct finds (server-owned fields on every wri
 
 ## Skill v0.3 (10 Nov 2026): from *Explore It!*
 
-Elisabeth Hendrickson's *Explore It!* (2013) has a full chapter for each of several things v0.2 only hinted at. v0.3 adds them, in its own words. A new [`references/heuristics.md`](skills/exploratory-testing/references/heuristics.md) holds the details.
+Elisabeth Hendrickson's *Explore It!* (2013) has a full chapter for each of several things v0.2 only hinted at. v0.3 adds them, in its own words. A new [`references/heuristics.md`](../skills/exploratory-testing/references/heuristics.md) holds the details.
 
 - **Model before risks.** A short recon pass (about a tenth of the budget), then three models: entities and relationships, a state table (states × events), and variables. From her chapters on recon sessions, entities, states and variables.
 - **Never and Always rules** as a source of risks and an oracle: what must hold whatever anyone does. Plus the "worst headline" exercise for finding them (her Nightmare Headline Game).

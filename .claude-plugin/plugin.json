@@ -1,0 +1,14 @@
+{
+  "name": "exploratory-testing",
+  "displayName": "Exploratory Testing",
+  "description": "Explores a running system (HTTP API, web app, CLI or library) to find the bugs scripted tests miss: models the system, writes risk-based charters, explores them with tours, backs every claim with evidence, and reports bugs, behaviour that needs a decision, and open questions separately.",
+  "version": "0.3.0",
+  "author": {
+    "name": "Hamidreza Mahdavipanah",
+    "url": "https://github.com/mahdavipanah"
+  },
+  "homepage": "https://github.com/mahdavipanah/exploratory-testing-skill",
+  "repository": "https://github.com/mahdavipanah/exploratory-testing-skill",
+  "license": "MIT",
+  "keywords": ["testing", "exploratory-testing", "qa", "bug-hunting", "api-testing", "agent-skills"]
+}

@@ -1,12 +1,15 @@
 #!/usr/bin/env bash
 # Print the full prompt for one arm: shared rules + arm text, with placeholders filled.
 # Usage: scripts/compose-prompt.sh <A|B|C|D|M> <port> <run-dir>
-#   D inlines skills/exploratory-testing (SKILL.md and its references).
+#   D inlines the skill from ../skills/exploratory-testing (SKILL.md and its references),
+#   or from $AET_SKILL_DIR if set.
 #   M (memory check) is standalone: no shared rules, no API access.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 ARM="$1"; PORT="$2"; RUN_DIR="$3"
+SKILL_DIR="${AET_SKILL_DIR:-$ROOT/../skills/exploratory-testing}"
+[ -f "$SKILL_DIR/SKILL.md" ] || { echo "No SKILL.md in $SKILL_DIR" >&2; exit 1; }
 . "$ROOT/scripts/target-env.sh"
 
 case "$ARM" in
@@ -19,15 +22,14 @@ case "$ARM" in
   *) echo "Unknown arm: $ARM (use A, B, C, D or M)" >&2; exit 1 ;;
 esac
 
-python3 -I - "$ROOT" "$ARM_FILE" "$PORT" "$RUN_DIR" "$TARGET_RECORDS" <<'EOF'
+python3 -I - "$ROOT" "$ARM_FILE" "$PORT" "$RUN_DIR" "$TARGET_RECORDS" "$SKILL_DIR" <<'EOF'
 import glob
 import os
 import sys
 
-root, arm, port, run_dir, records = sys.argv[1:6]
+root, arm, port, run_dir, records, skill_dir = sys.argv[1:7]
 read = lambda p: open(p, encoding="utf-8").read()
 
-skill_dir = os.path.join(root, "skills", "exploratory-testing")
 skill = read(os.path.join(skill_dir, "SKILL.md")).strip()
 for ref in sorted(glob.glob(os.path.join(skill_dir, "references", "*.md"))):
     rel = os.path.relpath(ref, skill_dir)

@@ -4,7 +4,7 @@ description: Explores a running system (HTTP API, web app, CLI or library) to fi
 license: MIT
 metadata:
   version: "0.3"
-  source: "https://github.com/mahdavipanah/agentic-exploratory-testing-lab"
+  source: "https://github.com/mahdavipanah/exploratory-testing-skill"
 ---
 
 # Exploratory testing

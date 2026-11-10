@@ -4,7 +4,7 @@ A dependency-free stand-in for the official `skills-ref validate`; use that too 
 Checks: frontmatter fields and limits, name rules and folder match, body under 500 lines,
 and that every relative link in SKILL.md points to an existing file one level deep.
 
-Usage: python3 -I scripts/validate-skill.py skills/exploratory-testing
+Usage (from lab/): python3 -I scripts/validate-skill.py ../skills/exploratory-testing
 """
 import os
 import re

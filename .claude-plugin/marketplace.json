@@ -1,0 +1,15 @@
+{
+  "name": "exploratory-testing-skill",
+  "description": "Exploratory testing for coding agents, with the experiments behind it.",
+  "owner": {
+    "name": "Hamidreza Mahdavipanah",
+    "url": "https://github.com/mahdavipanah"
+  },
+  "plugins": [
+    {
+      "name": "exploratory-testing",
+      "source": "./",
+      "description": "Explore a running API, app, CLI or library to find the bugs scripted tests miss, with evidence for every claim."
+    }
+  ]
+}
