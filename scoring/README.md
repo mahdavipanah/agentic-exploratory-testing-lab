@@ -69,3 +69,13 @@ Arm M's findings are predictions, made without access to the API. Score each pre
 - **What M's recall means:** how much of the answer key the model can name from memory and the docs alone. Compare it with the exploring arms' recall.
 - **The "Why" field:** each prediction says whether it came from the docs or from prior knowledge. Predictions marked "prior knowledge" that name Restful-booker bugs are direct evidence of training-data recall.
 
+## Blind scoring (batch-2 onwards)
+
+For the held-out target, the experimenter never saw the answer key before the runs, and the scoring was done blind to the arm:
+
+1. `scripts/blind-sheet.py results/<batch> <seed> <sheet.md> <codes.txt>` renames each run to a random code (R01, R02, ...) and keeps only its Findings and Questions. Charters, risks and coverage name the arm's instructions, so they are left out. The code table stays with the experimenter.
+2. A scorer agent gets the sheet, the sealed key, these rules and the API docs, and nothing that names an arm. It writes one line per item (`R07 F3 T04 | note`). It confirms new problems on a fresh server and gives them ids from T16 upwards.
+3. A second scorer agent independently scores a random sample of 100 items, for an agreement rate.
+4. The experimenter translates codes to runs, writes `scoring/map-<batch>.txt` and applies it as usual. The scorers' raw files are kept beside it.
+
+Claimdesk's ids use the letter T, so run `score.py` with `--prefix T`.

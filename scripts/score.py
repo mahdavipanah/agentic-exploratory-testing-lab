@@ -1,9 +1,10 @@
 """Compute recall per run and per arm from a filled-in score sheet, with simple statistics.
 
 Usage: python3 -I scripts/score.py scoring/scores-<batch>.csv 39 [--schedule results/<batch>/schedule.txt]
-                                 [--only K04,K20,...] [--arms A,B,C,D]
+                                 [--only K04,K20,...] [--arms A,B,C,D] [--prefix T]
 
---only restricts scoring to the listed key items (the ceiling becomes their number); --arms keeps only those arms.
+--only restricts scoring to the listed key items (the ceiling becomes their number); --arms keeps only those arms;
+--prefix is the key's id letter (K for Restful-booker, T for claimdesk).
 
 Rows with section=finding count toward "findings" recall; section=question rows count only toward
 "noticed". A run's arm is the first letter of its run id (A, B, C, D, M).
@@ -28,6 +29,11 @@ if "--schedule" in args:
     schedule_path = args[i + 1]
     del args[i:i + 2]
 only = arms_keep = None
+prefix = "K"
+if "--prefix" in args:
+    i = args.index("--prefix")
+    prefix = args[i + 1]
+    del args[i:i + 2]
 if "--only" in args:
     i = args.index("--only")
     only = set(args[i + 1].split(","))
@@ -170,7 +176,7 @@ if multi:
                        else "no sign that later sessions did better")
             print(f"\nSpearman rho = {rho:+.2f}, permutation p = {p:.3f}: {verdict}.")
 
-allk = only or {f"K{i:02d}" for i in range(1, ceiling + 1)}
+allk = only or {f"{prefix}{i:02d}" for i in range(1, ceiling + 1)}
 print("\nNever noticed by any run:", ", ".join(sorted(allk - un)) or "none")
 print("Only in questions, never in findings:", ", ".join(sorted(un - us)) or "none")
 if unscored:

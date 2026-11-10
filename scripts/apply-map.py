@@ -24,7 +24,7 @@ for n, line in enumerate(open(map_path, encoding="utf-8"), 1):
     run, item, keys = parts
     if (run, item) in mapping:
         sys.exit(f"{map_path}:{n}: {run} {item} mapped twice")
-    if keys not in ("-", "FP") and not re.fullmatch(r"K\d\d(;K\d\d)*", keys):
+    if keys not in ("-", "FP") and not re.fullmatch(r"[A-Z]\d\d(;[A-Z]\d\d)*", keys):
         sys.exit(f"{map_path}:{n}: bad key list {keys!r}")
     mapping[(run, item)] = (keys, note.strip())
 
