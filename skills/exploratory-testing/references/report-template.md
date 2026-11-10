@@ -25,7 +25,7 @@ One line each: Explore ... with ... to discover .... Tour: .... Budget: ....
 Unconfirmed suspicions only, each with what you saw and what would confirm it.
 
 ## Coverage
-Per charter: what you covered. What you didn't reach. Budget used.
+Per charter: what you covered and what you saw working. What remains unknown, and the risks you didn't reach. Budget used.
 ```
 
-Write titles that describe the problem, not the test ("PATCH with one date wipes the other", not "Tested PATCH"). If one probe shows two separate problems, report them as two findings.
+Write titles that describe the problem, not the test ("Renaming a playlist drops its last song", not "Tested rename"). If one probe shows two separate problems, report them as two findings.

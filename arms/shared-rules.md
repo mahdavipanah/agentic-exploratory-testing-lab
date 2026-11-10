@@ -5,7 +5,7 @@ Its documentation is in {{RUN_DIR}}/api.md. Read it first.
 
 - **Black box.** Interact with the API only over HTTP, using `curl`. Do not read any file other than `{{RUN_DIR}}/api.md`, do not search the filesystem, and do not look for the server's source code.
 - **Budget.** Send at most 80 HTTP requests in total. Keep a running count. Re-running a request to reproduce something counts too.
-- **Test data.** This is a disposable test copy with fake data. Creating, changing and deleting bookings is fine.
+- **Test data.** This is a disposable test copy with fake data. Creating, changing and deleting {{RECORDS}} is fine.
 - **Evidence.** Only report a finding after you have seen it in a real response. Reproduce each finding at least once before you report it. Put anything you suspect but could not confirm under "Questions", not "Findings".
 - **Report.** Write your report to `{{RUN_DIR}}/report.md` using the format below. When you are done, reply with one line: the number of findings and the number of requests you used.
 

@@ -77,3 +77,20 @@ Batch-1's lessons, added to `SKILL.md`. Examples are kept generic, so nothing mi
 - **Your own mistakes** now name typos, stale tokens and different spellings of the same path. (From the harness's `/var` vs `/private/var` bug.)
 
 Unchanged: the rules behind D's distinct finds (server-owned fields on every write path, read-back, wrong docs still count).
+
+## Skill v0.3 (10 Nov 2026): from *Explore It!*
+
+Elisabeth Hendrickson's *Explore It!* (2013) has a full chapter for each of several things v0.2 only hinted at. v0.3 adds them, in its own words. A new [`references/heuristics.md`](skills/exploratory-testing/references/heuristics.md) holds the details.
+
+- **Model before risks.** A short recon pass (about a tenth of the budget), then three models: entities and relationships, a state table (states × events), and variables. From her chapters on recon sessions, entities, states and variables.
+- **Never and Always rules** as a source of risks and an oracle: what must hold whatever anyone does. Plus the "worst headline" exercise for finding them (her Nightmare Headline Game).
+- **Follow the data**, **walk the state table** (the cells the docs don't cover are where surprises live), and act as every role that touches the same data.
+- **Vary on purpose, not by habit:** zero/one/many, some/none/all, beginning/middle/end, Goldilocks, other formats, plus nouns-and-verbs pairing and personas to break routine. Agents have strong habits, the same "John Doe" data and the same create-read-update-delete order every time, so this matters more for them than for people.
+- **Ask the deeper question:** not "did it succeed?" but "can I use what it produced?"
+- **When the exact answer is unknowable:** invert it, check a range or property, push inputs to extremes. Added to `oracles.md`.
+- **Stopping and reporting:** stop when you're no longer learning, or more probing wouldn't change the report. Out of budget means saying what remains unknown. Report what you saw working, and give facts, not verdicts.
+- **If you wrote the code:** watch the server's logs while you explore ("testability is visibility and control").
+
+**A leak, found and fixed.** The report template's example title in v0 to v0.2 ("PATCH with one date wipes the other") was Restful-booker's K22. It reached arm D in batch-1. It made no difference to the comparison, because every arm found K22 in all 20 runs, A included. v0.3 uses an example from an unrelated domain.
+
+**Known bias for batch-2.** The experimenter wrote both the held-out target's specification and v0.3, on the same day. The spec asks for common bug classes: state machine, authorization, arithmetic, dates, partial update, consistency, idempotency, error handling. The skill's heuristics are generic and come from a 2013 book, but they cover those same classes. The experimenter has not seen the planted bugs or the target's source.

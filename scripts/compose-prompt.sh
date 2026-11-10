@@ -7,22 +7,24 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 ARM="$1"; PORT="$2"; RUN_DIR="$3"
+. "$ROOT/scripts/target-env.sh"
 
 case "$ARM" in
   A) ARM_FILE="$ROOT/arms/A-baseline.md" ;;
-  B) ARM_FILE="$ROOT/arms/B-human-charters.md" ;;
+  B) ARM_FILE="$TARGET_B_CHARTERS"
+     [ -f "$ARM_FILE" ] || { echo "No arm-B charters for $AET_TARGET: $ARM_FILE" >&2; exit 1; } ;;
   C) ARM_FILE="$ROOT/arms/C-agent-charters.md" ;;
   D) ARM_FILE="$ROOT/arms/D-skill.md" ;;
   M) ARM_FILE="$ROOT/arms/M-memory.md" ;;
   *) echo "Unknown arm: $ARM (use A, B, C, D or M)" >&2; exit 1 ;;
 esac
 
-python3 -I - "$ROOT" "$ARM_FILE" "$PORT" "$RUN_DIR" <<'EOF'
+python3 -I - "$ROOT" "$ARM_FILE" "$PORT" "$RUN_DIR" "$TARGET_RECORDS" <<'EOF'
 import glob
 import os
 import sys
 
-root, arm, port, run_dir = sys.argv[1:5]
+root, arm, port, run_dir, records = sys.argv[1:6]
 read = lambda p: open(p, encoding="utf-8").read()
 
 skill_dir = os.path.join(root, "skills", "exploratory-testing")
@@ -31,12 +33,12 @@ for ref in sorted(glob.glob(os.path.join(skill_dir, "references", "*.md"))):
     rel = os.path.relpath(ref, skill_dir)
     skill += f"\n\n---\n\n<!-- file: {rel} -->\n\n" + read(ref).strip()
 
-if os.path.basename(arm).startswith("M-"):
+if os.path.basename(os.path.dirname(arm)) == "arms" and os.path.basename(arm).startswith("M-"):
     text = read(arm).strip() + "\n"
 else:
     text = read(os.path.join(root, "arms", "shared-rules.md")).rstrip() + "\n\n" + read(arm).strip() + "\n"
 text = text.replace("{{TOURS}}", read(os.path.join(root, "arms", "tours.md")).strip())
 text = text.replace("{{SKILL}}", skill)
-text = text.replace("{{PORT}}", port).replace("{{RUN_DIR}}", run_dir)
+text = text.replace("{{PORT}}", port).replace("{{RUN_DIR}}", run_dir).replace("{{RECORDS}}", records)
 sys.stdout.write(text)
 EOF

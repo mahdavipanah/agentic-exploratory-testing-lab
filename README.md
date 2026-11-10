@@ -52,7 +52,7 @@ Full write-up: [`results/batch-1/summary.md`](results/batch-1/summary.md). One h
 
 **Pilot (earlier the same day):** one run per arm, isolated by instruction only. Rescored against 39 items: A 23%, B 46%, C 51%. With one run, C looked at least as good as B. Five runs show C is the least reliable. See [`results/pilot-2026-11-09/summary.md`](results/pilot-2026-11-09/summary.md). Lessons for the skill: [`skill-notes.md`](skill-notes.md).
 
-**Next:** skill v0.2 (done: see [`skill-notes.md`](skill-notes.md)) on a target the skill has never seen. Batch-1 used v0.1, at commit [`c0795db`](https://github.com/mahdavipanah/agentic-exploratory-testing-lab/tree/c0795db); each run's `prompt.md` also holds the exact skill text it got.
+**Next:** skill v0.3 (batch-1's lessons plus Elisabeth Hendrickson's *Explore It!*; see [`skill-notes.md`](skill-notes.md)) on a target the skill has never seen. Batch-1 used v0.1, at commit [`c0795db`](https://github.com/mahdavipanah/agentic-exploratory-testing-lab/tree/c0795db); each run's `prompt.md` also holds the exact skill text it got.
 
 ## The skill
 

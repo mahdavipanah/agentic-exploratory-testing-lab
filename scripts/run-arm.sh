@@ -38,7 +38,8 @@ LABEL="${5:-runs-$(date +%Y-%m-%d)}"
 MODEL="${AET_MODEL:-}"
 ISOLATION="n/a"
 
-[ -f "$ROOT/target/api.md" ] || { echo "target/api.md missing: run scripts/setup-target.sh first" >&2; exit 1; }
+. "$ROOT/scripts/target-env.sh"
+[ -f "$TARGET_API_MD" ] || { echo "$TARGET_API_MD missing: run scripts/setup-target.sh first (Restful-booker)" >&2; exit 1; }
 
 CONFIG_HOME=""
 if [ "$AGENT" = "claude" ]; then
@@ -94,7 +95,7 @@ fi
 trap '"$ROOT/scripts/start-target.sh" stop "$PORT" >/dev/null 2>&1 || true; rm -rf "$RUN_DIR" "$RUN_DIR".home-*.json; [ -z "$CONFIG_HOME" ] || rm -rf "$CONFIG_HOME"' EXIT
 
 [ "$ARM" = "M" ] || "$ROOT/scripts/start-target.sh" "$PORT"
-cp "$ROOT/target/api.md" "$RUN_DIR/api.md"
+cp "$TARGET_API_MD" "$RUN_DIR/api.md"
 "$ROOT/scripts/compose-prompt.sh" "$ARM" "$PORT" "$RUN_DIR" > "$OUT/prompt.md"
 PROMPT="$(cat "$OUT/prompt.md")"
 START=$(date +%s)
@@ -175,7 +176,7 @@ fi
 {
   printf 'arm=%s\nrun=%s\nagent=%s\nagent_version=%s\nisolation=%s\nmodel=%s\nport=%s\nseconds=%s\n' \
     "$ARM" "$RUN" "$AGENT" "$AGENT_VERSION" "$ISOLATION" "${MODEL:-cli default}" "$PORT" "$((END-START))"
-  printf 'agent_exit=%s\ntarget_commit=%s\norder=%s\n' "$AGENT_EXIT" "$(git -C "$ROOT/target/restful-booker" rev-parse --short HEAD 2>/dev/null || echo unknown)" "${AET_ORDER:-n/a}"
+  printf 'agent_exit=%s\ntarget=%s\ntarget_commit=%s\norder=%s\n' "$AGENT_EXIT" "$AET_TARGET" "$(target_version)" "${AET_ORDER:-n/a}"
   if [ "$ISOLATION" = "login" ]; then
     printf 'auto_memory=disabled\nlogin_home_memory_changes=%s\n' "$(grep -c . "$OUT/login-home-memory-changes.txt" || true)"
   fi

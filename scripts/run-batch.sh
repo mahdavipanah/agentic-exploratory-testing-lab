@@ -25,7 +25,8 @@ LABEL="$1"; RUNS="${2:-5}"; AGENT="${3:-claude}"; ARMS="${4:-A B C D}"
 PARALLEL="${AET_PARALLEL:-4}"; START="${AET_RUN_START:-1}"
 SEED="${AET_SEED:-$RANDOM$RANDOM}"
 
-[ -f "$ROOT/target/api.md" ] || "$ROOT/scripts/setup-target.sh"
+. "$ROOT/scripts/target-env.sh"
+[ -f "$TARGET_API_MD" ] || target_setup
 
 ISOLATION="n/a"
 if [ "$AGENT" = "claude" ]; then
@@ -54,8 +55,8 @@ SCHEDULE="$ROOT/results/$LABEL/schedule.txt"
 OFFSET=0
 [ -f "$SCHEDULE" ] && OFFSET=$(grep -c '^[0-9]' "$SCHEDULE" || true)
 [ -f "$SCHEDULE" ] || printf '# order arm run port wave started_utc\n' > "$SCHEDULE"
-printf '# seed=%s runs=%s-%s arms=%s agent=%s isolation=%s parallel=%s\n' \
-  "$SEED" "$START" "$((START + RUNS - 1))" "$ARMS" "$AGENT" "$ISOLATION" "$PARALLEL" >> "$SCHEDULE"
+printf '# seed=%s runs=%s-%s arms=%s agent=%s isolation=%s parallel=%s target=%s\n' \
+  "$SEED" "$START" "$((START + RUNS - 1))" "$ARMS" "$AGENT" "$ISOLATION" "$PARALLEL" "$AET_TARGET" >> "$SCHEDULE"
 
 # Build and shuffle the job list with a recorded seed (portable: no shuf on macOS).
 JOBS=$(python3 -I - "$SEED" "$START" "$RUNS" $ARMS <<'EOF'

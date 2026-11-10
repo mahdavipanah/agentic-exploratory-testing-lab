@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
-# Start (or restart) a fresh Restful-booker on a port. Restarting resets all data to the seed.
+# Start (or restart) a fresh target on a port. Restarting resets all data to the seed.
 # Usage: scripts/start-target.sh [port]     (default 3001)
 #        scripts/start-target.sh stop [port]
+# The target is chosen by AET_TARGET (default restful-booker; see scripts/target-env.sh).
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-DEST="$ROOT/target/restful-booker"
+. "$ROOT/scripts/target-env.sh"
 
 stop_port() {
   local port="$1" pidfile="/tmp/aet-target-$1.pid"
@@ -38,10 +39,8 @@ LOG="/tmp/aet-target-$PORT.log"
 
 stop_port "$PORT"
 
-# exec makes the background subshell become node, so $! is node's pid.
-# TZ is pinned to UTC: the target formats dates in local time, so in timezones
-# west of UTC every date shifts back a day (see scoring/answer-key.md, "Environment-dependent").
-( cd "$DEST" && PORT="$PORT" SEED=true TZ=UTC exec node ./bin/www ) > "$LOG" 2>&1 &
+# target_exec ends in exec, so the background subshell becomes the server and $! is its pid.
+( target_exec "$PORT" ) > "$LOG" 2>&1 &
 echo $! > "$PIDFILE"
 
 for _ in $(seq 1 40); do
@@ -50,7 +49,7 @@ for _ in $(seq 1 40); do
     exit 1
   fi
   if curl -s -o /dev/null "http://localhost:$PORT/ping"; then
-    echo "Target up on http://localhost:$PORT (pid $(cat "$PIDFILE"), log $LOG)"
+    echo "Target $AET_TARGET up on http://localhost:$PORT (pid $(cat "$PIDFILE"), log $LOG)"
     exit 0
   fi
   sleep 0.25

@@ -2,6 +2,7 @@
 # The whole experiment in one command, on your own machine, with your normal Claude Code login.
 #
 # Usage: scripts/run-experiment.sh [label=batch-<date>] [runs=5] [arms="A B C D M"]
+#        AET_TARGET=<name> scripts/run-experiment.sh ...   (a target in targets/<name>/; default restful-booker)
 #
 # 1. checks prerequisites   2. sets up the target   3. verifies the answer key
 # 4. runs one real test session and stops if anything looks wrong   5. runs the batch   6. prints a summary
@@ -13,6 +14,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 LABEL="${1:-batch-$(date +%Y-%m-%d)}"; RUNS="${2:-5}"; ARMS="${3:-A B C D M}"
 cd "$ROOT"
+. scripts/target-env.sh
 
 step() { printf '\n== %s ==\n' "$1"; }
 fail() { printf '\nStopped: %s\n' "$1" >&2; exit 1; }
@@ -25,12 +27,19 @@ node_major=$(node -p 'process.versions.node.split(".")[0]')
 [ "$node_major" -ge 20 ] || fail "Node 20 or newer is needed (found $(node -v))"
 echo "claude $(claude --version 2>/dev/null | head -1), node $(node -v), $(python3 --version)"
 
-step "2/5 Target"
-scripts/setup-target.sh
+step "2/5 Target: $AET_TARGET"
+target_setup
+scripts/start-target.sh 3001 >/dev/null || fail "the target did not start"
+scripts/start-target.sh stop 3001 >/dev/null
+echo "target $AET_TARGET, version $(target_version)"
 
 step "3/5 Answer key"
-python3 -I scripts/verify-answer-key.py > "/tmp/aet-verify-$$.txt" || fail "the answer key no longer reproduces; see /tmp/aet-verify-$$.txt"
-tail -1 "/tmp/aet-verify-$$.txt"
+if [ "$AET_TARGET" = "restful-booker" ]; then
+  python3 -I scripts/verify-answer-key.py > "/tmp/aet-verify-$$.txt" || fail "the answer key no longer reproduces; see /tmp/aet-verify-$$.txt"
+  tail -1 "/tmp/aet-verify-$$.txt"
+else
+  echo "sealed until scoring; commitment: $(cat "$TARGET_DIR/answer-key.sha256" 2>/dev/null || echo 'none (targets/'"$AET_TARGET"'/answer-key.sha256 missing)')"
+fi
 
 step "4/5 One real test session (about 5 minutes)"
 SMOKE="smoke-$LABEL"

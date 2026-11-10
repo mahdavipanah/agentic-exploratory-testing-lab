@@ -117,6 +117,7 @@ The pilot had one run per arm, with agents told (not forced) to ignore memory. I
 - Restful-Booker is in the model's training data, and arm M shows the model can name half the key without running anything.
 - The experimenter wrote arm B's charters and the skill, and also matched the findings to the key. Every match and judgement call is in `scoring/map-batch-1.txt` for review.
 - Recall is against a known ceiling (every problem anyone confirmed), not against all the bugs in the app.
+- **Leak found after the batch.** The skill's report template used an example title ("PATCH with one date wipes the other") that describes K22. Every arm found K22 in all 20 runs, so it doesn't change any comparison. It was removed in skill v0.3.
 
 ## Reproduce
 
