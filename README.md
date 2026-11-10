@@ -2,7 +2,7 @@
 
 An [Agent Skill](https://agentskills.io) that makes a coding agent explore software the way a good tester does: it learns the system, writes risk-based missions, follows them, and backs every claim with the request and the response that prove it. It works with Claude Code, Codex, Cursor, Gemini CLI and other agents that read `SKILL.md`.
 
-Agents usually write the code and its tests from one picture of how a feature should work, so the tests mostly check that picture. Exploring the running software is how the agent questions it. The essay *Teaching Agents to Explore* (link coming soon) tells the story, and [`lab/`](lab/) holds the experiments behind it.
+Agents usually write the code and its tests from one picture of how a feature should work, so the tests mostly check that picture. Exploring the running software is how the agent questions it. The essay [*Teaching Agents to Explore*](https://hamidreza.tech/teaching-agents-to-explore) tells the story, and [`lab/`](lab/) holds the experiments behind it.
 
 ## Install
 

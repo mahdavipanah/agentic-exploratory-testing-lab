@@ -1,6 +1,6 @@
 # The lab
 
-The experiments behind the [exploratory-testing skill](../skills/exploratory-testing/SKILL.md) and the essay *Teaching Agents to Explore* (link coming soon). Run every command below from this `lab/` folder.
+The experiments behind the [exploratory-testing skill](../skills/exploratory-testing/SKILL.md) and the essay [*Teaching Agents to Explore*](https://hamidreza.tech/teaching-agents-to-explore). Run every command below from this `lab/` folder.
 
 Until 10 Nov 2026 the lab was the whole repository, named `agentic-exploratory-testing-lab`, so commits and tags from before then (such as `batch-1`) have these folders at the repository root.
 
