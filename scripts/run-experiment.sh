@@ -62,13 +62,15 @@ step "5/5 Batch: $RUNS runs of each arm in '$ARMS', shuffled, 4 at a time"
 scripts/run-batch.sh "$LABEL" "$RUNS" claude "$ARMS"
 
 step "Summary"
-total=0; failed=0; mem=0
+total=0; failed=0; mem=0; files=0; rebuilt=0
 for meta in results/"$LABEL"/*/meta.txt; do
   total=$((total + 1))
   grep -q '^agent_exit=0$' "$meta" || failed=$((failed + 1))
   if grep -q -E '^(login_home_memory_changes|fresh_home_memory_files)=[1-9]' "$meta"; then mem=$((mem + 1)); fi
+  if grep -q -E '^curl_file_urls=[1-9]' "$meta"; then files=$((files + 1)); fi
+  if grep -q '^report_source=transcript$' "$meta"; then rebuilt=$((rebuilt + 1)); fi
 done
-echo "sessions: $total, failed: $failed, sessions with memory-file changes: $mem"
+echo "sessions: $total, failed: $failed, with memory-file changes: $mem, reading local files via curl: $files, reports rebuilt from transcripts: $rebuilt"
 [ "$failed" -eq 0 ] || echo "Some sessions failed; rerun them later with AET_RUN_START or scripts/run-arm.sh."
 echo
 echo "Share the results:"

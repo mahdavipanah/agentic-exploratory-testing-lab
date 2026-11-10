@@ -12,6 +12,7 @@ import sys
 curl_calls = tool_calls = denied = 0
 curl_requests = 0
 curl_by_id = {}
+file_urls = 0
 refused_ids = set()
 model = "unknown"
 result = {}
@@ -29,6 +30,8 @@ for line in open(sys.argv[1]):
                 if block.get("name") == "Bash" and "curl" in cmd:
                     curl_calls += 1
                     # one Bash call can hold several curl invocations
+                    if re.search(r"file:", cmd, re.I):
+                        file_urls += 1  # curl can read local files; the black-box rule forbids it
                     n = len(re.findall(r"(?:^|[;&|(\s])curl\s", cmd)) or 1
                     curl_requests += n
                     curl_by_id[block.get("id")] = n
@@ -53,6 +56,7 @@ print(f"curl_invocations_executed={sum(n for i, n in curl_by_id.items() if i not
 print(f"tool_calls={tool_calls}")
 print(f"denied_tool_calls={denied}")
 print(f"refused_tool_calls={len(refused_ids)}")
+print(f"curl_file_urls={file_urls}")
 for key in ("num_turns", "duration_ms", "total_cost_usd", "is_error", "subtype"):
     if key in result:
         print(f"{key}={result[key]}")
