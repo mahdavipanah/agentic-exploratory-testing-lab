@@ -91,6 +91,4 @@ done
 
 echo
 echo "Batch done: results/$LABEL (schedule: results/$LABEL/schedule.txt, seed $SEED)"
-echo "Next: python3 -I scripts/extract-findings.py results/$LABEL > scoring/scores-$LABEL.csv"
-echo "      fill key_ids and verdict for every finding, then"
-echo "      python3 -I scripts/score.py scoring/scores-$LABEL.csv 38 --schedule results/$LABEL/schedule.txt"
+echo "Next: score it (see scoring/README.md): extract-findings.py, a map file, apply-map.py, then score.py"

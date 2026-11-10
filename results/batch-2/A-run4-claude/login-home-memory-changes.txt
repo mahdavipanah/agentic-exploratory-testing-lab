@@ -1,0 +1,1 @@
+# 2 memory files changed while this session ran. Both are in another project's memory folder, written by a Claude Code session in another repo on the same machine at the same time, not by this experiment. Paths removed for privacy; see results/batch-2/README.md.
