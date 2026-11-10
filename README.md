@@ -25,6 +25,12 @@ claude plugin install exploratory-testing@exploratory-testing-skill
 npx skills add mahdavipanah/exploratory-testing-skill
 ```
 
+When it asks which agents to install for, pick yours. To use the skills CLI for Claude Code instead of the plugin, name it, or the skill may only land in `~/.agents/skills/`, which Claude Code doesn't read:
+
+```bash
+npx skills add mahdavipanah/exploratory-testing-skill -g -a claude-code
+```
+
 **By hand:** copy [`skills/exploratory-testing/`](skills/exploratory-testing/) into your agent's skills folder. For Claude Code that is `~/.claude/skills/`, or `.claude/skills/` in a project.
 
 ## Use it
