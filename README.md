@@ -50,9 +50,25 @@ Charters use Elisabeth Hendrickson's template, *Explore (target) with (resources
 
 Full write-up: [`results/batch-1/summary.md`](results/batch-1/summary.md). One harness bug affected this batch and was repaired from the transcripts; see [`results/batch-1/README.md`](results/batch-1/README.md).
 
+**batch-2, 10 Nov 2026: the held-out target.** [claimdesk](targets/claimdesk/) is an API the model has never seen, with 15 bugs planted by a separate agent session. Its answer key was sealed (hash committed before the runs) and the scoring was done blind to the arm, with 96 of 100 items confirmed by a second scorer. 5 runs per arm, skill v0.3.
+
+| Arm | Recall (mean, range) | Precision |
+| --- | --- | --- |
+| A, no mission | 68% (53–80%) | 51 of 51 |
+| B, experimenter's charters | 71% (60–80%) | 53 of 53 |
+| C, agent's own charters | 63% (53–73%) | 47 of 47 |
+| D, the skill | 72% (67–87%) | 54 of 55 |
+| M, docs only, no API | 71% (67–73%) | 56 of 219 |
+
+- **No arm difference is significant here.** On a small API whose docs state every rule, the default agent already covers most of the surface.
+- **Prediction gets recall by guessing a lot.** The bugs sit where the docs make promises, so predicting from the docs found as many, but 3 in 4 predictions were wrong.
+- **Missions show on specific bugs.** One example: a total that goes stale in the list after an item is removed was found by 5 of 5 B runs and 4 of 5 D runs, against 0 of 5 for A.
+
+Full write-up: [`results/batch-2/summary.md`](results/batch-2/summary.md).
+
 **Pilot (earlier the same day):** one run per arm, isolated by instruction only. Rescored against 39 items: A 23%, B 46%, C 51%. With one run, C looked at least as good as B. Five runs show C is the least reliable. See [`results/pilot-2026-11-09/summary.md`](results/pilot-2026-11-09/summary.md). Lessons for the skill: [`skill-notes.md`](skill-notes.md).
 
-**Next:** skill v0.3 (batch-1's lessons plus Elisabeth Hendrickson's *Explore It!*; see [`skill-notes.md`](skill-notes.md)) on a target the skill has never seen. Batch-1 used v0.1, at commit [`c0795db`](https://github.com/mahdavipanah/agentic-exploratory-testing-lab/tree/c0795db); each run's `prompt.md` also holds the exact skill text it got.
+Batch-1 used skill v0.1 (commit [`c0795db`](https://github.com/mahdavipanah/agentic-exploratory-testing-lab/tree/c0795db)); batch-2 used v0.3 (batch-1's lessons plus Elisabeth Hendrickson's *Explore It!*; see [`skill-notes.md`](skill-notes.md)). Each run's `prompt.md` holds the exact skill text it got.
 
 ## The skill
 

@@ -1,0 +1,512 @@
+run,section,item,title,key_ids,verdict,note
+A-run1-claude,finding,F1,"DELETE /claims/{id}/items/{itemId} deletes items that belong to other claims, including other users' claims and submitted or approved claims",T13,TP,
+A-run1-claude,finding,F2,A manager can approve or reject claims from another team,T05,TP,
+A-run1-claude,finding,F3,Paying a claim that is already paid records another payment,T11,TP,
+A-run1-claude,finding,F4,"The meals limit only checks single items, not the total for a day",T07,TP,
+A-run1-claude,finding,F5,Item amounts are silently truncated to a lower value,T06,TP,
+A-run1-claude,finding,F6,An item dated exactly 90 days ago is rejected,T08,TP,
+A-run1-claude,finding,F7,The `q` search does not match item descriptions,T15,TP,
+A-run1-claude,finding,F8,"The default `per_page` is 10, but the docs say 20",T14,TP,
+A-run1-claude,question,Q1,"F8: I could not check whether lists without `per_page` really stop at 10 items, because no user could see more than 10 c",,,untested
+A-run1-claude,question,Q2,F2: frank gets 404 on `GET /claims/3` but can review it. The review endpoint seems to skip both the visibility check and,,,untested extension
+A-run1-claude,question,Q3,PATCH with a `title` key and an unchanged state: I did not check whether `updated_at` changes on an empty `{}` PATCH.,,,untested
+A-run1-claude,question,Q4,"I did not test resubmitting a rejected claim (no bob token was used, and alice had no rejected claim), oversized bodies ",,,untested
+A-run2-claude,finding,F1,"PATCH lets the owner set `status` directly (self-approve, then get paid)",T09,TP,
+A-run2-claude,finding,F2,A manager can review claims from another team,T05,TP,
+A-run2-claude,finding,F3,Paying an already-paid claim records a second payment,T11,TP,
+A-run2-claude,finding,F4,"You can delete an item through a different claim's URL, even if that claim is approved",T13,TP,item moved out of another (own) claim incl. approved one; item not in path claim
+A-run2-claude,finding,F5,A rejected claim cannot be submitted again,T03,TP,
+A-run2-claude,finding,F6,"The meals limit of 60.00 per day is checked per item, not as a daily total",T07,TP,
+A-run2-claude,finding,F7,Item date exactly 90 days ago (2026-08-12) is rejected,T08,TP,
+A-run2-claude,finding,F8,Text search `q` does not search item descriptions,T15,TP,
+A-run2-claude,finding,F9,Default `per_page` is 10 instead of 20,T14,TP,
+A-run2-claude,finding,F10,`meta.next_page` is not null on the last page,T02,TP,
+A-run2-claude,question,Q1,"After F4, claim 12's `updated_at` stayed the same even though its item was removed. This is probably part of the same bu",,,victim updated_at unchanged: symptom of T13
+A-run2-claude,question,Q2,"After the self-approval in F1, the claim has `reviewed_by: null` and `submitted_at: null`, but finance can still pay it.",T09,,self-approved claim paid without review = T09 skip-review; DUP
+A-run2-claude,question,Q3,"I could not test the length limits (title over 120 characters, comment over 500, reference over 64) because building lon",,,untested
+A-run2-claude,question,Q4,"`PUT /claims/9` gives `Allow: GET, PATCH, DELETE`, which looks correct.",,,correct behaviour noted
+A-run3-claude,finding,F1,"PATCH lets the owner set `status` directly, so they can approve their own claim and get it paid",T09,TP,
+A-run3-claude,finding,F2,Paying an already-paid claim records another payment,T11,TP,
+A-run3-claude,finding,F3,A manager can review claims from another team,T05,TP,
+A-run3-claude,finding,F4,Any user can delete items from another user's claim through their own claim's path,T13,TP,
+A-run3-claude,finding,F5,"`owner` filter on GET /claims bypasses visibility, exposing other users' and other teams' claims, including drafts",T04,TP,
+A-run3-claude,finding,F6,Rejected claims cannot be resubmitted,T03,TP,
+A-run3-claude,finding,F7,Cumulative meals limit (60.00 per day per claim) is not enforced,T07,TP,
+A-run3-claude,finding,F8,Amount 0 is accepted,T01,TP,
+A-run3-claude,finding,F9,Earliest allowed item date (today − 90 days) is rejected,T08,TP,
+A-run3-claude,finding,F10,Search `q` does not match item descriptions,T15,TP,
+A-run3-claude,finding,F11,"Default `per_page` is 10, not 20",T14,TP,
+A-run3-claude,finding,F12,Invalid `sort` value causes a 500,T12,TP,
+A-run3-claude,question,Q1,`updated_at` on alice's claim 11 did not change after bob removed its items through `/claims/13/items/...` (F4). A norma,,,victim updated_at: symptom of T13
+A-run3-claude,question,Q2,I did not check that `GET /claims/{id}` for other users' claims stays 404 once F5 has exposed the ids. It did stay 404 f,,,untested
+A-run3-claude,question,Q3,"Error precedence is not documented. When a manager PATCHes a claim that is not in an editable state, should it return 40",,,design question about precedence
+A-run4-claude,finding,F1,Manager of another team can approve or reject claims they cannot even see,T05,TP,
+A-run4-claude,finding,F2,The owner can set `status` with PATCH and approve their own claim,T09,TP,
+A-run4-claude,finding,F3,Paying an already paid claim records another payment,T11,TP,
+A-run4-claude,finding,F4,DELETE item does not check that the item belongs to the claim in the path,T13,TP,
+A-run4-claude,finding,F5,"`owner` filter on GET /claims bypasses visibility, exposing other users' claims and drafts",T04,TP,
+A-run4-claude,finding,F6,Meals limit of 60.00 per day is not applied across items,T07,TP,
+A-run4-claude,finding,F7,Amount 0 is accepted,T01,TP,
+A-run4-claude,finding,F8,Earliest allowed item date (today − 90 days) is rejected,T08,TP,
+A-run4-claude,finding,F9,Search `q` does not match item descriptions,T15,TP,
+A-run4-claude,finding,F10,"Default `per_page` is 10, not 20",T14,TP,
+A-run4-claude,question,Q1,"After F4 removed items from approved/paid claims, `updated_at` of those claims did not change (claim 1 still `2026-10-09",,,victim updated_at: symptom of T13
+A-run4-claude,question,Q2,"Paid claims can end up with `amount_paid` ≠ `total` (e.g. claim 9: total 0, amount_paid 75.6). This is a result of F3/F4",T11;T13,,"judgement: amount_paid != total here comes from double pay (T11) and post-payment item deletion (T13), not T10's stale payment; DUP"
+A-run4-claude,question,Q3,"I did not check whether `POST /claims` fails atomically when a later item is invalid. Also not checked: `invalid_json`, ",,,untested
+A-run5-claude,finding,F1,"A manager can review claims from another team, which they cannot even see",T05,TP,
+A-run5-claude,finding,F2,"PATCH accepts `status`, so an owner can approve or ""pay"" their own claim",T09,TP,
+A-run5-claude,finding,F3,Deleting an item does not check that it belongs to the claim in the path; any employee can delete items from other users' approved claims,T13,TP,
+A-run5-claude,finding,F4,Paying an already-paid claim records another payment,T11,TP,
+A-run5-claude,finding,F5,A rejected claim cannot be submitted again,T03,TP,
+A-run5-claude,finding,F6,"Meals daily limit of 60.00 is only checked per item, not per day",T07,TP,
+A-run5-claude,finding,F7,Item amount 0 is accepted,T01,TP,
+A-run5-claude,finding,F8,Search `q` does not match item descriptions,T15,TP,
+A-run5-claude,finding,F9,Earliest allowed item date (today − 90 days) is rejected,T08,TP,
+A-run5-claude,finding,F10,"Default `per_page` is 10, not 20",T14,TP,
+A-run5-claude,finding,F11,`next_page` points to an empty page when the total is an exact multiple of `per_page`,T02,TP,"body also shows default per_page 10 (T14), already F10"
+A-run5-claude,question,Q1,"F3: I only tried it as an employee who owns a draft. It may also work for paths through claims in other states, or for o",,,untested extension
+A-run5-claude,question,Q2,"F2: Can PATCH also change `reviewed_by`, `amount_paid` or `submitted_at`? Not tested; `owner` and `total` were ignored.",,,untested PATCH fields
+A-run5-claude,question,Q3,"After F1, a manager can review a claim they cannot `GET`. I didn't check whether other actions (e.g. pay) have the same ",,,untested extension
+A-run5-claude,question,Q4,"Not tested: tie ordering by id, `owner` filter, invalid JSON / non-object bodies, 413, 405 with `Allow` header, trailing",,,untested list
+B-run1-claude,finding,F1,PATCH /claims/{id} lets the owner set `status` (e.g. draft → paid) and skip review and payment,T09,TP,
+B-run1-claude,finding,F2,Paying an already paid claim records a second payment,T11,TP,
+B-run1-claude,finding,F3,A manager of another team can approve or reject a claim,T05,TP,
+B-run1-claude,finding,F4,"DELETE /claims/{id}/items/{itemId} removes items from other claims, including other users' claims",T13,TP,
+B-run1-claude,finding,F5,A rejected claim cannot be resubmitted,T03,TP,
+B-run1-claude,finding,F6,List summaries show a stale `total` after an item is removed,T10,TP,
+B-run1-claude,finding,F7,`q` search does not match item descriptions,T15,TP,
+B-run1-claude,finding,F8,`meta.next_page` points to an empty page when the last page is exactly full,T02,TP,
+B-run1-claude,finding,F9,Items dated exactly 90 days ago (2026-08-12) are rejected,T08,TP,
+B-run1-claude,finding,F10,"The meals daily limit is checked per item, not per day",T07,TP,
+B-run1-claude,finding,F11,An amount of 0 is accepted,T01,TP,
+B-run1-claude,finding,F12,"The default `per_page` is 10, not 20",T14,TP,
+B-run1-claude,question,Q1,"When an item was deleted through the wrong claim (F4), the `updated_at` of the claim that owns the item was not changed ",,,victim updated_at: symptom of T13
+B-run1-claude,question,Q2,"Claim 11, which was set to `paid` through F1, has `amount_paid: null` and `paid_at: null`. Finance can see it as paid, a",T09,,claim set to paid via PATCH with null payment fields; DUP
+B-run1-claude,question,Q3,I did not check exact title/description length limits with non-ASCII text: I could not build exact-length bodies. A 130-,,,untested
+B-run1-claude,question,Q4,I did not check whether the stale summary total (F6) affects `sort=total` order.,,,untested
+B-run1-claude,question,Q5,"In the frank case, review succeeds but GET returns 404. Can frank see other actions on claims from the platform team (fo",,,untested extension
+B-run2-claude,finding,F1,"PATCH /claims/{id} accepts `status`, so an owner can mark their own claim approved or paid",T09,TP,
+B-run2-claude,finding,F2,"Managers can approve or reject claims from other teams, including claims they cannot see",T05,TP,
+B-run2-claude,finding,F3,Paying an already-paid claim records another payment,T11,TP,
+B-run2-claude,finding,F4,A rejected claim cannot be resubmitted,T03,TP,
+B-run2-claude,finding,F5,Items with amount 0 are accepted,T01,TP,
+B-run2-claude,finding,F6,The daily meals limit of 60.00 is not enforced,T07,TP,
+B-run2-claude,finding,F7,A date exactly 90 days ago is rejected,T08,TP,
+B-run2-claude,finding,F8,List summaries and `sort=total` use a stale total after an item is removed,T10,TP,
+B-run2-claude,finding,F9,Search (`q`) does not match item descriptions,T15,TP,
+B-run2-claude,finding,F10,"The default `per_page` is 10, not 20",T14,TP,
+B-run2-claude,finding,F11,`meta.next_page` points to an empty page on the last page,T02,TP,
+B-run2-claude,question,Q1,F2 shows that the review endpoint skips the visibility check. I did not test whether a manager from another team can use,,,untested extension
+B-run2-claude,question,Q2,"The 403 message for finance on review says ""only a manager of the claimant's team can review this claim"". So a team chec",T05,,notes team check does not stop other-team managers; DUP of F2
+B-run2-claude,question,Q3,"After F1, is it possible to PATCH a claim back from `paid` to `draft`? I did not try this. If so, items could be edited ",,,untested
+B-run2-claude,question,Q4,F8: I did not check whether the stale total also affects `amount_paid` when a claim is paid. That would require a claim ,,,untested
+B-run2-claude,question,Q5,I did not check whether three-decimal amounts that are floating-point artefacts (for example 0.1+0.2-type values) are ha,,,untested
+B-run3-claude,finding,F1,"Paying an already-paid claim pays it again (amount_paid doubles, reference and paid_at overwritten)",T11,TP,
+B-run3-claude,finding,F2,A manager can review claims from another team,T05,TP,
+B-run3-claude,finding,F3,A rejected claim cannot be resubmitted,T03,TP,
+B-run3-claude,finding,F4,List summary total is not reduced when an item is removed (also wrong in sort),T10,TP,
+B-run3-claude,finding,F5,Meals limit of 60.00 per day is not enforced across items,T07,TP,
+B-run3-claude,finding,F6,Amount 0 is accepted,T01,TP,
+B-run3-claude,finding,F7,Search does not match item descriptions,T15,TP,
+B-run3-claude,finding,F8,The earliest documented valid date (90 days ago) is rejected,T08,TP,
+B-run3-claude,finding,F9,"Default page size is 10, not 20",T14,TP,
+B-run3-claude,question,Q1,For the cross-team approvals of claims 3 and 6 (F2) I cut the output and did not capture the status code; the body showe,T05,,restates cross-team approvals (status code cut); DUP
+B-run3-claude,question,Q2,"After F2, claims 3 and 6 are `approved` by a manager from the wrong team; I did not test whether finance can then pay th",,,untested
+B-run3-claude,question,Q3,"F4: I did not check whether a stale list total also affects `total` filtering/`-total` paging edges, or whether it persi",,,untested
+B-run3-claude,question,Q4,F6 makes zero-total claims possible; I did not check if such a claim can be submitted and paid.,,,untested
+B-run3-claude,question,Q5,Re-paying (F1) also moves `paid_at`; unclear whether a separate payments record exists — the API exposes only `amount_pa,T11,,paid_at moves on re-pay; DUP
+B-run4-claude,finding,F1,"PATCH /claims/{id} lets the owner set `status` directly (skips submit, review and approval)",T09,TP,
+B-run4-claude,finding,F2,A rejected claim cannot be resubmitted,T03,TP,
+B-run4-claude,finding,F3,Paying an already-paid claim records another payment,T11,TP,
+B-run4-claude,finding,F4,List summary `total` does not go down when an item is removed,T10,TP,
+B-run4-claude,finding,F5,Item amounts are silently changed (rounded down by a cent) on save,T06,TP,
+B-run4-claude,finding,F6,Item amount 0 is accepted,T01,TP,
+B-run4-claude,finding,F7,Meals limit of 60.00 per day is not enforced,T07,TP,
+B-run4-claude,finding,F8,Earliest allowed item date (today − 90 days) is rejected,T08,TP,
+B-run4-claude,finding,F9,A manager can review claims of another team,T05,TP,
+B-run4-claude,finding,F10,"Default page size is 10, not 20",T14,TP,
+B-run4-claude,question,Q1,"Overpayment from stale total (seen once). After removing an item from claim 14, finance paid it: `POST /claims/14/pay` →",T10,,amount_paid 61.16 > total 41.18 after removal = T10 payment drift; DUP of F4
+B-run4-claude,question,Q2,"Claim 11, set to `paid` through PATCH (F1), shows `paid_at: null` and `amount_paid: null`; I did not check whether finan",T09,,claim set to paid via PATCH; DUP
+B-run4-claude,question,Q3,"`POST /claims/9/review` by alice (owner, employee) correctly gave `403`, but the message says ""only a manager of the cla",T05,,notes other-team manager can review; DUP of F9
+B-run4-claude,question,Q4,Description of 201 characters was rejected with a clear message; I did not test exactly 200 characters or non-ASCII desc,,,untested
+B-run5-claude,finding,F1,"PATCH /claims/{id} applies the `status` field, so an owner can set their own claim to approved or paid",T09,TP,
+B-run5-claude,finding,F2,Paying an already-paid claim records another payment,T11,TP,
+B-run5-claude,finding,F3,A rejected claim cannot be resubmitted,T03,TP,
+B-run5-claude,finding,F4,Managers can review claims from other teams,T05,TP,
+B-run5-claude,finding,F5,"The `owner` list filter ignores visibility, so anyone can list another user's claims, including drafts",T04,TP,
+B-run5-claude,finding,F6,List summary `total` still counts deleted items,T10,TP,
+B-run5-claude,finding,F7,Search `q` doesn't match item descriptions,T15,TP,
+B-run5-claude,finding,F8,Items with amount 0 are accepted,T01,TP,
+B-run5-claude,finding,F9,The meals limit of 60.00 per day isn't enforced,T07,TP,"title ""isn't enforced"" means the daily limit; body shows per-item check only"
+B-run5-claude,finding,F10,An item dated exactly 90 days ago (2026-08-12) is rejected,T08,TP,
+B-run5-claude,finding,F11,"The default `per_page` is 10, not 20",T14,TP,
+B-run5-claude,question,Q1,"After F1, claim 11 is `paid` with `paid_at` and `amount_paid` null, and `GET /claims` puts it in the paid lists. I didn'",T09,,describes claim set to paid via PATCH (T09 state); DUP of F1
+B-run5-claude,question,Q2,"Carol's cross-team rejection of claim 6 (F4): the HTTP status code was cut from my output. The body was the claim, and e",T05,,restates carol's cross-team reject (status code missing); DUP of F4
+B-run5-claude,question,Q3,A meal over 60.00 in a single item (for example one meal of 60.01) wasn't tested separately. F9 suggests the daily limit,,,untested single-item case
+B-run5-claude,question,Q4,"I didn't check whether `updated_at` changes when a repeat pay is ""safe"". It changed in F2, which also contradicts ""chang",T11,,"updated_at moved on repeat pay = ""changes nothing"" violated; DUP of F2"
+B-run5-claude,question,Q5,Payment `reference` length (64) and comment length (500) limits weren't tested.,,,untested limits
+C-run1-claude,finding,F1,A manager can approve/reject claims from another team (that they cannot even see),T05,TP,
+C-run1-claude,finding,F2,"PATCH accepts `status`, letting an owner approve their own claim, which finance then pays",T09,TP,
+C-run1-claude,finding,F3,Paying an already paid claim pays again (amount_paid doubles) and overwrites reference/paid_at,T11,TP,
+C-run1-claude,finding,F4,"`owner` filter on GET /claims returns claims the caller may not see, including drafts",T04,TP,
+C-run1-claude,finding,F5,"Meals daily limit of 60.00 is only checked per item, not per day",T07,TP,
+C-run1-claude,finding,F6,`q` search ignores item descriptions,T15,TP,
+C-run1-claude,finding,F7,The documented earliest item date (today − 90 days) is rejected,T08,TP,
+C-run1-claude,finding,F8,"Default `per_page` is 10, not 20",T14,TP,
+C-run1-claude,question,Q1,"Resubmitting a rejected claim seems to be refused: bob's claim 11 (submitted, then rejected by carol) → `POST /claims/11",T03,,observed once: rejected claim resubmit 409 (noticed)
+C-run1-claude,question,Q2,I could not confirm that default per_page 10 actually truncates results (no user sees more than 10 claims); only meta wa,T14,,observed default per_page 10 in meta (second scorer; adjudicated: describes the key behaviour)
+C-run1-claude,question,Q3,"Unchecked: whether trimming of `description`/`title` counts characters correctly at 200/120, purpose 500 limit, `referen",,,untested
+C-run2-claude,finding,F1,"Any employee can approve their own draft by PATCHing `status`, and finance will then pay it",T09,TP,
+C-run2-claude,finding,F2,A manager can review claims from another team,T05,TP,
+C-run2-claude,finding,F3,Paying an already-paid claim pays it again and doubles `amount_paid`,T11,TP,
+C-run2-claude,finding,F4,"An owner can delete items from other users' claims, including approved ones, through their own claim's path",T13,TP,
+C-run2-claude,finding,F5,"The meals limit of 60.00 per day is checked per item, not per day",T07,TP,
+C-run2-claude,finding,F6,An item amount of 0 is accepted,T01,TP,
+C-run2-claude,finding,F7,The oldest documented valid date (today − 90 days) is rejected,T08,TP,
+C-run2-claude,finding,F8,Search `q` does not match item descriptions,T15,TP,
+C-run2-claude,finding,F9,"The default `per_page` is 10, not 20",T14,TP,
+C-run2-claude,question,Q1,`updated_at` on claims 3 and 7 did not change when F4 removed their items. The docs say an item removal updates it. This,,,"victim updated_at unchanged: symptom of T13, not a separate key item"
+C-run2-claude,question,Q2,"Seed claim 2 is already `paid`. Given F3, paying it again would probably double its amount too. Not tested.",,,untested prediction
+C-run2-claude,question,Q3,"The cumulative meals total of 0.1 + 0.2 + 59.7 (a floating-point edge case) was accepted. Because of F5, I can't tell wh",,,untested
+C-run2-claude,question,Q4,"When an approved claim is changed (F4), `amount_paid` would differ from what the manager approved. I did not pay claim 3",,,untested
+C-run3-claude,finding,F1,A manager can approve or reject claims from another team,T05,TP,
+C-run3-claude,finding,F2,Paying an already-paid claim records another payment,T11,TP,
+C-run3-claude,finding,F3,"DELETE /claims/{id}/items/{itemId} deletes items from other users' claims, including paid ones",T13,TP,
+C-run3-claude,finding,F4,A rejected claim cannot be resubmitted,T03,TP,
+C-run3-claude,finding,F5,"The meals daily limit (60.00 per date per claim) applies to each item, not to the day's sum",T07,TP,
+C-run3-claude,finding,F6,An item dated exactly 90 days ago (the documented earliest date) is rejected,T08,TP,
+C-run3-claude,finding,F7,The `total` in GET /claims summaries is not updated when an item is removed,T10,TP,
+C-run3-claude,finding,F8,The `q` search does not match item descriptions,T15,TP,
+C-run3-claude,finding,F9,An invalid `sort` value causes a 500 instead of a 400,T12,TP,
+C-run3-claude,finding,F10,"The default `per_page` is 10, not 20",T14,TP,
+C-run3-claude,question,Q1,F2: The server clearly adds to `amount_paid` on every repeat. Is `payment_reference` also being wiped? Re-paying claim 2,T11,,reference null after repeat pay; DUP
+C-run3-claude,question,Q2,"F3: Can a user who isn't the owner also *add* items to someone else's claim, or delete through a claim path that isn't t",,,untested extension
+C-run3-claude,question,Q3,"F1: Frank gets 404 on `GET /claims/3` but can review it, so the review endpoint seems to skip the visibility check. I di",,,untested extension
+C-run3-claude,question,Q4,"Item ids: the seed probably holds ids 1–17, and new items started at 18. I did not confirm that the failed `POST /claims",,,"seed ids, unverified"
+C-run4-claude,finding,F1,A manager can approve or reject claims from another team,T05,TP,
+C-run4-claude,finding,F2,Deleting an item through your own claim's path removes an item from someone else's claim,T13,TP,
+C-run4-claude,finding,F3,"PATCH lets the owner set `status`, so the claim skips review and finance pays it",T09,TP,
+C-run4-claude,finding,F4,Paying an already-paid claim records another payment,T11,TP,
+C-run4-claude,finding,F5,A rejected claim cannot be resubmitted,T03,TP,
+C-run4-claude,finding,F6,"The meals limit of 60.00 per day is checked per item, not per day",T07,TP,
+C-run4-claude,finding,F7,The documented earliest item date (today − 90 days) is rejected,T08,TP,
+C-run4-claude,finding,F8,The list's `total` disagrees with the claim's `total` after items are removed,T10,TP,stale list total after T13 removals; describes stale total
+C-run4-claude,finding,F9,"The default `per_page` is 10, not 20",T14,TP,
+C-run4-claude,question,Q1,"`next_page` may point to an empty page. `GET /claims` (default per_page 10, total_count 10) returned `next_page: 2`, but",T02,,"observed once: total_count 10, per_page 10, next_page 2, page 2 empty (noticed)"
+C-run4-claude,question,Q2,"F2 also bumps `updated_at` on the claim in the path (claim 4), even though nothing on it changed. That claim's own item ",,,path claim updated_at bumped: symptom of T13
+C-run4-claude,question,Q3,"Reviewing with a missing or blank comment could not be tested: the only submitted claims had been reviewed by then, and ",,,409 before 400 is quirk Q19
+C-run4-claude,question,Q4,"Some things I didn't test: submitting a draft with no items (400 `items`), 405 with the `Allow` header, 413 for bodies o",,,untested
+C-run5-claude,finding,F1,"PATCH accepts `status`, so an owner can approve their own claim and get it paid",T09,TP,
+C-run5-claude,finding,F2,Paying an already-paid claim records another payment (amount_paid doubles),T11,TP,
+C-run5-claude,finding,F3,Any manager can review claims from other teams,T05,TP,
+C-run5-claude,finding,F4,"The `owner` filter skips visibility, so managers see other teams' claims, drafts included",T04,TP,
+C-run5-claude,finding,F5,Amounts are stored rounded down (1.15 becomes 1.14),T06,TP,
+C-run5-claude,finding,F6,The daily meals limit is not enforced across items,T07,TP,
+C-run5-claude,finding,F7,The earliest allowed item date (today − 90 days) is rejected,T08,TP,
+C-run5-claude,finding,F8,Search (`q`) does not match item descriptions,T15,TP,
+C-run5-claude,finding,F9,"Default `per_page` is 10, not 20",T14,TP,
+C-run5-claude,finding,F10,`next_page` points to an empty page when the last page is exactly full,T02,TP,
+C-run5-claude,finding,F11,An invalid `sort` value returns 500 instead of 400,T12,TP,
+C-run5-claude,question,Q1,"F1: Does PATCH also accept other undocumented fields, such as `submitted_at`, `reviewed_by` or `amount_paid`? I only tes",,,untested PATCH fields
+C-run5-claude,question,Q2,"F2: Did the second pay create a second payment record, or did it only overwrite `amount_paid`? The API has no payments e",,,"asks about payment record internals, no new observation"
+C-run5-claude,question,Q3,"F3: Can a manager also review claims from their own team that they own, or claims of other managers? The seed data has n",,,design question
+C-run5-claude,question,Q4,F4: Does `owner=<user>` also let an employee see other employees' claims? I only tried it with manager tokens.,,,untested
+C-run5-claude,question,Q5,F5: Is the rounding down a float truncation (e.g. `Math.floor(x*100)`)? It hits exactly the values whose ×100 result is ,,,cause speculation for F5
+C-run5-claude,question,Q6,"When a claim is paid a second time, `payment_reference` is overwritten with null if no reference is sent. This is part o",T11,,payment_reference overwritten with null on repeat pay; DUP of F2
+D-run1-claude,finding,F1,An owner can delete any item of any claim by giving that item's id under one of their own draft claims,T13,TP,
+D-run1-claude,finding,F2,"PATCH accepts `status`, so an owner can set their own claim to approved without submitting it or having it reviewed, and finance then pays it",T09,TP,
+D-run1-claude,finding,F3,A manager can approve or reject claims from another team (claims they cannot even see),T05,TP,
+D-run1-claude,finding,F4,Paying an already-paid claim records a second payment and overwrites the payment details,T11,TP,
+D-run1-claude,finding,F5,"The `owner` filter on `GET /claims` lists other users' claims, including drafts",T04,TP,
+D-run1-claude,finding,F6,A rejected claim cannot be resubmitted,T03,TP,
+D-run1-claude,finding,F7,"The meals limit of 60.00 per day applies to each item, not to the day's total",T07,TP,
+D-run1-claude,finding,F8,The earliest allowed item date (today minus 90 days) is rejected,T08,TP,
+D-run1-claude,finding,F9,Text search `q` does not search item descriptions,T15,TP,
+D-run1-claude,finding,F10,`meta.next_page` points to an empty page when the results fill the last page exactly,T02,TP,
+D-run1-claude,finding,F11,"The default page size is 10, not the documented 20",T14,TP,
+D-run1-claude,question,Q1,`POST /claims/11/pay` on the self-approved claim (F2): my output was truncated before the status code. The body was the ,T09,,pay on self-approved claim (status code cut); DUP of F2
+D-run1-claude,question,Q2,"When F1 removes items, the victim claims' `updated_at` stays the same. That conflicts with ""updated_at … an item added o",,,victim updated_at: symptom of T13
+D-run1-claude,question,Q3,"I did not test whether a manager can review a claim in their own team that they own (managers cannot create claims, so t",,,untested
+D-run1-claude,question,Q4,I did not check whether a whitespace-only rejection comment is treated as missing (the probe hit `409` because the claim,,,untested; 409 is quirk Q19
+D-run2-claude,finding,F1,"A manager can approve or reject claims from another team, even claims they cannot see",T05,TP,
+D-run2-claude,finding,F2,Paying an already-paid claim pays it again (amount_paid doubles),T11,TP,
+D-run2-claude,finding,F3,"An owner can set `status` with PATCH, skipping review; finance then pays the claim",T09,TP,
+D-run2-claude,finding,F4,"DELETE /claims/{id}/items/{itemId} removes items from other claims, including other users' locked claims",T13,TP,
+D-run2-claude,finding,F5,Item amounts lose a cent when saved (19.99 → 19.98),T06,TP,
+D-run2-claude,finding,F6,"The meals daily limit (60.00) is checked per item, not per day",T07,TP,
+D-run2-claude,finding,F7,An item dated exactly 90 days ago (2026-08-12) is rejected,T08,TP,
+D-run2-claude,finding,F8,List totals are not updated when an item is removed,T10,TP,
+D-run2-claude,finding,F9,Search `q` does not match item descriptions,T15,TP,
+D-run2-claude,finding,F10,"Default `per_page` is 10, not 20",T14,TP,
+D-run2-claude,question,Q1,"Resubmitting a rejected claim returns 409. Erin added an item to rejected claim 11 (`201`, so editing works), then `POST",T03,,observed once: rejected claim resubmit 409 (noticed)
+D-run2-claude,question,Q2,`updated_at` after item removal. It did not change after the cross-claim deletion (F4). I did not check whether a normal,,,victim updated_at: symptom of T13
+D-run2-claude,question,Q3,"After the repeat pay of seed claim 2, `payment_reference` was `null`. The seed value before that was never read, so I ca",T11,,reference null after repeat pay; DUP
+D-run2-claude,question,Q4,"Could a manager approve a claim of a user with no team, or approve a draft through the cross-team gap? Not tried.",,,untested
+D-run3-claude,finding,F1,"PATCH /claims/{id} lets the owner set `status` to anything, including `approved` (self-approval, skipping review)",T09,TP,
+D-run3-claude,finding,F2,"DELETE /claims/{id}/items/{itemId} deletes any item in any claim, whatever its owner or status",T13,TP,
+D-run3-claude,finding,F3,"A manager can approve or reject claims of another team, which they cannot even see",T05,TP,
+D-run3-claude,finding,F4,Paying an already-paid claim records the payment again (amount_paid doubles) and overwrites paid_at and the reference,T11,TP,
+D-run3-claude,finding,F5,"The meals limit of 60.00 per day is only checked per item, not as a daily sum",T07,TP,
+D-run3-claude,finding,F6,An item amount of 0 is accepted,T01,TP,
+D-run3-claude,finding,F7,The earliest allowed item date is off by one day (2026-08-12 is rejected),T08,TP,
+D-run3-claude,finding,F8,A 199-character item description is rejected as over 200 characters,,FP,does not reproduce: 199- and 200-char descriptions return 201 on a fresh server (agent's string was likely longer)
+D-run3-claude,finding,F9,Search `q` does not match item descriptions,T15,TP,
+D-run3-claude,finding,F10,"The default page size is 10, not the documented 20",T14,TP,
+D-run3-claude,finding,F11,"After the cross-claim item delete, the list summary `total` disagrees with the claim detail",T10,TP,stale list total after T13 delete; scoring note credits T10 when stale total is described
+D-run3-claude,question,Q1,"A zero-total claim (claim 13, `""total"":0`) can be submitted. This follows from F6. Should a submit require a positive to",,,design question (zero-total submit follows from T01)
+D-run3-claude,question,Q2,"After the repeat pay on seed claim 2, `payment_reference` is `null`. I didn't read claim 2 before paying it, so I can't ",T11,,reference null after repeat pay on seed claim 2 (seed had a reference); DUP
+D-run3-claude,question,Q3,"Item ids skip 17 (seed items end at 16 or 17, and the first new item got 18). Probably an unseen seed item on a draft. N",,,"misread: seed has 17 items, no gap"
+D-run3-claude,question,Q4,"PATCH on a rejected claim with `purpose:""""` gave `purpose:null`, as documented. I didn't check whether `updated_at` chan",,,documented behaviour / untested
+D-run3-claude,question,Q5,"F8: the limit may actually be 198 or ""< 200"". Sending exactly 200 and 201 characters would show the real boundary.",,,about F8 boundary
+D-run4-claude,finding,F1,"A manager can approve or reject claims from another team, even though they can't see those claims",T05,TP,
+D-run4-claude,finding,F2,Paying a claim that is already paid adds the payment again and overwrites the payment details,T11,TP,
+D-run4-claude,finding,F3,"The owner can PATCH `status` and `reviewed_by`, so an employee can approve their own claim and get it paid",T09,TP,
+D-run4-claude,finding,F4,DELETE /claims/{id}/items/{itemId} deletes items from other users' claims,T13,TP,
+D-run4-claude,finding,F5,"The per-day meals limit of 60.00 is only checked per item, never as a daily sum",T07,TP,
+D-run4-claude,finding,F6,"The `total` in the claim list doesn't update after an item is removed, and sort by total uses the old value",T10,TP,
+D-run4-claude,finding,F7,A rejected claim cannot be resubmitted,T03,TP,
+D-run4-claude,finding,F8,The oldest accepted item date is off by one: 2026-08-12 is rejected,T08,TP,
+D-run4-claude,finding,F9,`next_page` points to an empty page when the last page is exactly full,T02,TP,
+D-run4-claude,finding,F10,"Default page size is 10, not the documented 20",T14,TP,
+D-run4-claude,question,Q1,"The submit error message says ""only draft claims can be submitted"", and the delete message says the same about drafts. T",,,cause speculation about F7
+D-run4-claude,question,Q2,"After F4, the victim claim's `updated_at` did not change even though its items changed. I saw this once on claim 11, and",,,victim updated_at: symptom of T13
+D-run4-claude,question,Q3,"For seed claim 2 (already paid), I don't know the original `payment_reference`. The repeat pay without a body left it `n",T11,,reference null after repeat pay on seed claim 2; DUP
+D-run4-claude,question,Q4,"Does a paid claim created by F3 (`amount_paid: null`) break finance reports? There is no report endpoint, so I couldn't ",T09,,paid-via-PATCH claim with null amount_paid; DUP
+D-run4-claude,question,Q5,"Not tested: whether a cross-team manager (F1) can also reject without the comment rule, or approve claims that are still",,,untested
+D-run5-claude,finding,F1,Paying an already-paid claim pays it again (amount_paid accumulates),T11,TP,
+D-run5-claude,finding,F2,"Owner can approve their own claim by PATCHing `status`, and finance then pays it",T09,TP,
+D-run5-claude,finding,F3,"Any owner can delete items of any other claim, in any status, through their own draft claim's URL",T13,TP,
+D-run5-claude,finding,F4,Managers can approve or reject claims from other teams,T05,TP,
+D-run5-claude,finding,F5,A rejected claim cannot be resubmitted,T03,TP,
+D-run5-claude,finding,F6,"Daily meals limit is checked only per item, not per day",T07,TP,
+D-run5-claude,finding,F7,Amounts are silently truncated by one cent (1.13 → 1.12),T06,TP,
+D-run5-claude,finding,F8,An amount of 0 is accepted,T01,TP,
+D-run5-claude,finding,F9,The earliest allowed item date (today − 90 days) is rejected,T08,TP,
+D-run5-claude,finding,F10,The list shows stale totals after an item is removed,T10,TP,
+D-run5-claude,finding,F11,`meta.next_page` points to an empty page when the count is an exact multiple of per_page,T02,TP,
+D-run5-claude,finding,F12,"Default page size is 10, not 20",T14,TP,
+D-run5-claude,finding,F13,Search `q` does not match item descriptions,T15,TP,
+D-run5-claude,question,Q1,Docs port. The docs give `localhost:3001`; the API runs on 3002. This probably only reflects the run setup.,,,"docs port vs run port: run setup, not a defect"
+D-run5-claude,question,Q2,updated_at not bumped. F3 deletions didn't change the victim claim's `updated_at`. I didn't check whether a legitimate o,,,victim updated_at: symptom of T13
+D-run5-claude,question,Q3,"Rejected claims elsewhere. Because of F5, I couldn't test the edit → resubmit → re-review path, or whether old review fi",,,untested
+D-run5-claude,question,Q4,Pay with no body. A repeat pay with no body cleared payment_reference to null (part of F1). I didn't test what a first p,T11,,repeat pay with no body cleared reference; DUP
+D-run5-claude,question,Q5,Item id gap. Item id 17 was skipped between seed data and my first create (probably a seed item of claim 7 or 10). This ,,,"misread: seed has 17 items, no gap"
+M-run1-claude,finding,F1,"Total uses floating-point sum, giving values like 251.39999999999998",,FP,"float-sum total, not T06"
+M-run1-claude,finding,F2,Amount decimal-place check fails on float edge cases,,FP,predicts rejection of valid amounts or acceptance of 3 decimals
+M-run1-claude,finding,F3,Amount boundary off-by-one at 10000 / 0,T01,TP,title names the 0 boundary; hedge includes amount 0 accepted
+M-run1-claude,finding,F4,Amount as string accepted/coerced,,FP,
+M-run1-claude,finding,F5,90-day date window off by one,T08,TP,
+M-run1-claude,finding,F6,Impossible calendar dates accepted,,FP,
+M-run1-claude,finding,F7,Meals daily limit off-by-one or ignores existing items,T07,TP,hedge includes single-item-only check (two 40.00 meals same day accepted)
+M-run1-claude,finding,F8,Meals limit counts items of other claims or other categories,,FP,
+M-run1-claude,finding,F9,POST /claims with invalid item still creates the claim (non-atomic),,FP,
+M-run1-claude,finding,F10,Validation error field lacks item index,,FP,
+M-run1-claude,finding,F11,DELETE item does not check item belongs to the claim,T13,TP,
+M-run1-claude,finding,F12,Manager can review claims from other teams,T05,TP,
+M-run1-claude,finding,F13,Drafts visible to managers/finance,T04,TP,"judgement: hedge names ""owner=alice filter bypasses visibility"", which is how drafts reach managers/finance"
+M-run1-claude,finding,F14,Wrong status code ordering: 403 vs 404 leak,,FP,
+M-run1-claude,finding,F15,Status check precedes ownership/role check (409 instead of 403),,FP,
+M-run1-claude,finding,F16,Manager can review their own claim / employee can review,,FP,
+M-run1-claude,finding,F17,Pay is not idempotent,T11,TP,
+M-run1-claude,finding,F18,Pay allowed from non-approved state,,FP,
+M-run1-claude,finding,F19,Reject without comment / whitespace comment accepted,,FP,
+M-run1-claude,finding,F20,Approve keeps previous review_comment,,FP,
+M-run1-claude,finding,F21,Resubmission doesn't update submitted_at / updated_at not bumped,,FP,
+M-run1-claude,finding,F22,Submit with zero items allowed,,FP,
+M-run1-claude,finding,F23,PATCH allows protected fields or title null,T09,TP,
+M-run1-claude,finding,F24,PATCH purpose empty string not normalized to null,,FP,
+M-run1-claude,finding,F25,Title length counted before trimming / over-limit off by one,,FP,
+M-run1-claude,finding,F26,Pagination next_page wrong / total_count wrong,T02,TP,
+M-run1-claude,finding,F27,page/per_page validation gaps,,FP,
+M-run1-claude,finding,F28,Sort ties not ordered by id ascending / total sort is string sort,,FP,
+M-run1-claude,finding,F29,Search q is case-sensitive or ignores item descriptions,T15,TP,
+M-run1-claude,finding,F30,Invalid status filter accepted / case issues,,FP,"predicts sort=foo ignored, key is 500"
+M-run1-claude,finding,F31,Path id parsing too lenient,,FP,
+M-run1-claude,finding,F32,Trailing slash and 405 handling,,FP,
+M-run1-claude,finding,F33,Body parsing errors mishandled,,FP,
+M-run1-claude,finding,F34,Login validation and auth header edge cases,,FP,
+M-run1-claude,finding,F35,Item id not unique across claims / reused after delete,,FP,
+M-run1-claude,finding,F36,Currency change allowed with no validation / case-insensitive,,FP,
+M-run1-claude,finding,F37,Pay reference validation,,FP,
+M-run1-claude,finding,F38,Delete claim leaves orphaned items,,FP,
+M-run1-claude,finding,F39,Owner filter bypasses visibility,T04,DUP,DUP of F13
+M-run2-claude,finding,F1,Totals suffer floating-point drift (e.g. 0.1 + 0.2 = 0.30000000000000004),,FP,"float-sum total, not T06"
+M-run2-claude,finding,F2,Two-decimal check on amount is wrong for some values,,FP,predicts rejection of valid amounts
+M-run2-claude,finding,F3,Amount boundary off-by-one: 10000 rejected or 0 / negative accepted,T01,TP,"title names ""0 / negative accepted"""
+M-run2-claude,finding,F4,"Amount type coercion: string ""12.50"", booleans or NaN-like values accepted",,FP,
+M-run2-claude,finding,F5,90-day date window off by one,T08,TP,
+M-run2-claude,finding,F6,"Invalid calendar dates accepted (2026-02-30, 2026-09-31)",,FP,
+M-run2-claude,finding,F7,Meals daily limit wrong at the boundary or not applied across sources,T07,TP,hedge includes meals not summed across items in one POST /claims
+M-run2-claude,finding,F8,POST /claims with an invalid item still creates the claim (not atomic),,FP,
+M-run2-claude,finding,F9,Validation error `field` missing index for nested items,,FP,
+M-run2-claude,finding,F10,Manager can review claims of another team,T05,TP,
+M-run2-claude,finding,F11,Managers/finance can see drafts,,FP,draft visibility without owner filter
+M-run2-claude,finding,F12,Wrong 403 vs 404 for invisible claims,,FP,
+M-run2-claude,finding,F13,"Status check order: 409 before 403/404, or 403 before 409 mismatches",,FP,
+M-run2-claude,finding,F14,Employee can review own claim (self-approval),,FP,
+M-run2-claude,finding,F15,Pay is not idempotent: a repeat pay changes paid_at / reference / amount_paid,T11,TP,
+M-run2-claude,finding,F16,amount_paid not equal to total or stale,T10,TP,"judgement: title ""amount_paid not equal to total or stale""; hedge includes computed from stale data"
+M-run2-claude,finding,F17,"Rejection without comment accepted, or whitespace-only comment accepted",,FP,
+M-run2-claude,finding,F18,"Resubmit/re-review leaves stale review fields, or submit doesn't update submitted_at",,FP,
+M-run2-claude,finding,F19,updated_at not bumped on item add/remove or status changes,,FP,
+M-run2-claude,finding,F20,"Submit with zero items allowed, or wrong error code",,FP,
+M-run2-claude,finding,F21,Editing allowed in wrong states,,FP,
+M-run2-claude,finding,F22,PATCH accepts protected fields (mass assignment),T09,TP,
+M-run2-claude,finding,F23,"PATCH title null / empty / whitespace accepted; purpose """" not converted to null",,FP,
+M-run2-claude,finding,F24,Currency case-insensitive or unvalidated,,FP,
+M-run2-claude,finding,F25,Delete item from another claim (item not belonging to path claim),T13,TP,
+M-run2-claude,finding,F26,Deleting a claim leaves orphaned items / item ids reused,,FP,
+M-run2-claude,finding,F27,Path id parsing too lax,,FP,
+M-run2-claude,finding,F28,Pagination errors,,FP,"prediction titled ""Pagination errors"" commits to no outcome (second scorer; adjudicated by the batch-1 M rule)"
+M-run2-claude,finding,F29,Sorting bugs,,FP,
+M-run2-claude,finding,F30,q search case-sensitive or ignores item descriptions,T15,TP,
+M-run2-claude,finding,F31,owner filter bypasses visibility,T04,TP,
+M-run2-claude,finding,F32,Invalid status filter not rejected,,FP,
+M-run2-claude,finding,F33,Malformed JSON / non-object body produces 500 or wrong error,,FP,
+M-run2-claude,finding,F34,Login type confusion,,FP,
+M-run2-claude,finding,F35,Authorization header parsing,,FP,
+M-run2-claude,finding,F36,Trailing slash and 405 handling,,FP,
+M-run2-claude,finding,F37,Description length checked before trim / not trimmed,,FP,
+M-run2-claude,finding,F38,Purpose length limit not enforced (501 chars accepted) or title 121 chars accepted,,FP,
+M-run2-claude,finding,F39,Payment reference validation missing,,FP,
+M-run2-claude,finding,F40,Content-Type/204 bodies,,FP,
+M-run3-claude,finding,F1,Claim total shows floating-point errors,,FP,"float-sum total, not T06"
+M-run3-claude,finding,F2,Two-decimal check on amount rejects valid values or accepts invalid ones,,FP,predicts rejection of valid amounts
+M-run3-claude,finding,F3,Amount boundaries wrong,T01,TP,hedge includes 0 accepted
+M-run3-claude,finding,F4,String amounts accepted,,FP,
+M-run3-claude,finding,F5,Meals daily limit off-by-one at exactly 60.00,,FP,"boundary at exactly 60.00, not the per-day sum"
+M-run3-claude,finding,F6,Meals limit not enforced across items in the same POST /claims body,T07,TP,
+M-run3-claude,finding,F7,"Meals limit counted wrongly (only the new item, all claims, or ignoring the date)",T07,DUP,"""only the new item"": 40 + 30 same date accepted; DUP of F6"
+M-run3-claude,finding,F8,90-day date window off by one,T08,TP,
+M-run3-claude,finding,F9,Today/future date computed in local time instead of UTC,,FP,
+M-run3-claude,finding,F10,Impossible calendar dates accepted,,FP,
+M-run3-claude,finding,F11,"Whitespace-only description/title accepted, or length checked before trimming",,FP,
+M-run3-claude,finding,F12,Category or currency validation case-insensitive or missing,,FP,
+M-run3-claude,finding,F13,POST /claims not atomic when an item is invalid,,FP,
+M-run3-claude,finding,F14,Error `field` index for items is wrong,,FP,
+M-run3-claude,finding,F15,Manager can see or act on draft claims of team members,,FP,
+M-run3-claude,finding,F16,Finance can see drafts,,FP,
+M-run3-claude,finding,F17,Manager can review a claim from another team,T05,TP,
+M-run3-claude,finding,F18,Other employees' claims return 403 instead of 404,,FP,
+M-run3-claude,finding,F19,`owner` filter bypasses visibility,T04,TP,
+M-run3-claude,finding,F20,Invalid list query parameters not rejected,,FP,"predicts sort=title silently defaults, key is 500"
+M-run3-claude,finding,F21,Pagination meta wrong,T02,TP,hedge includes next_page non-null on exact last page
+M-run3-claude,finding,F22,Sorting wrong,,FP,
+M-run3-claude,finding,F23,Search `q` incomplete,T15,TP,
+M-run3-claude,finding,F24,PATCH mass assignment,T09,TP,
+M-run3-claude,finding,F25,PATCH accepts `title: null` or crashes,,FP,
+M-run3-claude,finding,F26,PATCH/item changes allowed in wrong status,,FP,"direct edits in wrong state, not cross-claim delete"
+M-run3-claude,finding,F27,Status vs ownership check order wrong,,FP,
+M-run3-claude,finding,F28,`purpose` empty string not converted to null,,FP,
+M-run3-claude,finding,F29,`updated_at` not updated on item add/remove or status change,,FP,
+M-run3-claude,finding,F30,Total not recomputed after item removal,T10,TP,
+M-run3-claude,finding,F31,Deleting an item through the wrong claim id,T13,TP,
+M-run3-claude,finding,F32,DELETE claim allowed outside draft,,FP,
+M-run3-claude,finding,F33,Submit allows empty claim,,FP,
+M-run3-claude,finding,F34,Submit allowed from submitted/approved/paid,,FP,
+M-run3-claude,finding,F35,Resubmit does not update `submitted_at`,,FP,
+M-run3-claude,finding,F36,Reject comment validation,,FP,
+M-run3-claude,finding,F37,Approve doesn't clear old review comment,,FP,
+M-run3-claude,finding,F38,Invalid decision accepted,,FP,
+M-run3-claude,finding,F39,Repeated pay records a second payment or changes data,T11,TP,
+M-run3-claude,finding,F40,Pay allowed from wrong status or by wrong role,,FP,
+M-run3-claude,finding,F41,Pay reference not validated,,FP,
+M-run3-claude,finding,F42,Pay with no body fails,,FP,
+M-run3-claude,finding,F43,Path ids parsed leniently,,FP,
+M-run3-claude,finding,F44,Trailing slash not handled,,FP,
+M-run3-claude,finding,F45,Wrong method returns 404 or lacks Allow header,,FP,
+M-run3-claude,finding,F46,Malformed bodies cause 500,,FP,
+M-run3-claude,finding,F47,Login with non-string credentials crashes or succeeds,,FP,
+M-run3-claude,finding,F48,Bearer scheme case-sensitive,,FP,
+M-run3-claude,finding,F49,Missing Location header on POST /claims,,FP,
+M-run3-claude,finding,F50,Employee role checks for review,,FP,
+M-run4-claude,finding,F1,Manager can review a submitted claim from another team,T05,TP,prediction: commits to 200 on other-team review
+M-run4-claude,finding,F2,Managers or finance can see draft claims,,FP,prediction: general draft visibility for managers/finance (no owner filter named); not the key's behaviour
+M-run4-claude,finding,F3,`owner` filter leaks other employees' claims,T04,TP,
+M-run4-claude,finding,F4,Deleting an item through a different claim's path works,T13,TP,
+M-run4-claude,finding,F5,Paying an already-paid claim records a second payment or changes fields,T11,TP,
+M-run4-claude,finding,F6,Paying a claim in the wrong state succeeds,,FP,
+M-run4-claude,finding,F7,Review is allowed on a claim that isn't submitted,,FP,
+M-run4-claude,finding,F8,Float rounding in total,,FP,"float-sum total (0.30000000000000004), not T06 truncation"
+M-run4-claude,finding,F9,Two-decimal check misjudges valid amounts,,FP,"predicts valid amounts rejected, not stored one cent low"
+M-run4-claude,finding,F10,Amount boundary off-by-one,T01,TP,"judgement: title ""amount boundary off-by-one""; hedge names amount 0 accepted"
+M-run4-claude,finding,F11,Numeric string amount accepted,,FP,
+M-run4-claude,finding,F12,Date 90-day window off-by-one,T08,TP,hedge includes earliest date rejected
+M-run4-claude,finding,F13,"Today's date is rejected, or tomorrow is accepted, because of timezone handling",,FP,
+M-run4-claude,finding,F14,Impossible calendar dates accepted,,FP,
+M-run4-claude,finding,F15,Meals daily limit is wrong at the boundary or across items,T07,TP,"hedge includes ""only looks at the new item, not the sum per date"""
+M-run4-claude,finding,F16,Meals limit not enforced among items in `POST /claims`,T07,DUP,two 40.00 meals in POST /claims accepted = key repro; DUP of F15
+M-run4-claude,finding,F17,Invalid item in `POST /claims` still creates the claim,,FP,
+M-run4-claude,finding,F18,Wrong index in the `field` of an item error,,FP,
+M-run4-claude,finding,F19,"Description or title length checked before trimming, or not trimmed",,FP,
+M-run4-claude,finding,F20,"Invalid category, or currency in the wrong case, accepted",,FP,
+M-run4-claude,finding,F21,PATCH applies ignored fields (mass assignment),T09,TP,
+M-run4-claude,finding,F22,PATCH accepts `title: null` or an empty or too-long title,,FP,
+M-run4-claude,finding,F23,"PATCH `purpose: """"` not normalised to null (and the same in POST)",,FP,
+M-run4-claude,finding,F24,Editing a claim allowed in a non-editable state,,FP,
+M-run4-claude,finding,F25,DELETE of a rejected claim allowed,,FP,
+M-run4-claude,finding,F26,Submit with no items succeeds,,FP,
+M-run4-claude,finding,F27,Reject without a real comment accepted,,FP,
+M-run4-claude,finding,F28,"Owner gets the wrong status when reviewing their own claim, or non-managers can review",,FP,
+M-run4-claude,finding,F29,Payment reference length not validated,,FP,
+M-run4-claude,finding,F30,"`updated_at` not updated on item add or remove, or on status change",,FP,
+M-run4-claude,finding,F31,"Total not recalculated after item deletion, or in the list summary",T10,TP,stale list total after item deletion
+M-run4-claude,finding,F32,`next_page` wrong on the last page,T02,TP,
+M-run4-claude,finding,F33,`total_count` reflects page size or the unfiltered count,,FP,
+M-run4-claude,finding,F34,Pagination params poorly validated,,FP,
+M-run4-claude,finding,F35,Sort by total is wrong,,FP,"lexicographic/tie sort, not the key's behaviour"
+M-run4-claude,finding,F36,`q` search is case-sensitive or ignores item descriptions,T15,TP,hedge includes item descriptions not searched
+M-run4-claude,finding,F37,Invalid `status` filter returns 200,,FP,"predicts sort=foo ignored (200), key is 500"
+M-run4-claude,finding,F38,Non-canonical path ids accepted,,FP,
+M-run4-claude,finding,F39,Trailing slash or 405 handling wrong,,FP,
+M-run4-claude,finding,F40,Malformed body handling,,FP,
+M-run4-claude,finding,F41,Login crashes on non-string credentials,,FP,
+M-run4-claude,finding,F42,Bearer scheme handling,,FP,
+M-run4-claude,finding,F43,Ids reused after deletion,,FP,
+M-run4-claude,finding,F44,Managers or finance can create claims,,FP,
+M-run4-claude,finding,F45,Location header missing or wrong on create,,FP,
+M-run4-claude,finding,F46,"Currency PATCH on a claim with items gets 400, or converts amounts",,FP,
+M-run5-claude,finding,F1,Claim total has floating-point errors,,FP,"float-sum total, not T06 truncation"
+M-run5-claude,finding,F2,Two-decimal check on `amount` rejects valid values or accepts 3 decimals,,FP,"predicts rejection of valid amounts, not one cent low"
+M-run5-claude,finding,F3,`amount` upper bound off by one,,FP,
+M-run5-claude,finding,F4,`amount` 0 or negative or string accepted,T01,TP,title names amount 0 accepted
+M-run5-claude,finding,F5,90-day date window off by one,T08,TP,
+M-run5-claude,finding,F6,Today's date accepted/rejected wrongly due to time-of-day or local timezone,,FP,
+M-run5-claude,finding,F7,Impossible calendar dates accepted,,FP,
+M-run5-claude,finding,F8,Meals limit boundary — exactly 60.00 rejected,,FP,
+M-run5-claude,finding,F9,Meals limit not enforced across items inside one `POST /claims` body,T07,TP,two 40.00 meals on one date in POST /claims accepted = key repro
+M-run5-claude,finding,F10,Meals limit applied with wrong scope,,FP,"wrong-scope variants (across dates/claims/categories), not per-item-only"
+M-run5-claude,finding,F11,Partial creation when an item in `POST /claims` is invalid,,FP,
+M-run5-claude,finding,F12,Wrong `field` path for item errors in `POST /claims`,,FP,
+M-run5-claude,finding,F13,Manager of another team can see or review claims,T05,TP,hedge includes 200 on other-team review
+M-run5-claude,finding,F14,Drafts leak to managers/finance,,FP,"draft leak via status filter/GET/403, not via owner filter"
+M-run5-claude,finding,F15,Employee can read another employee's claim (IDOR),,FP,
+M-run5-claude,finding,F16,`owner` filter bypasses visibility,T04,TP,
+M-run5-claude,finding,F17,Search `q` incomplete,T15,TP,hedge includes item-description-only match failing
+M-run5-claude,finding,F18,`meta.next_page` wrong on exact last page,T02,TP,
+M-run5-claude,finding,F19,`meta.total_count` counts only the current page or all claims,,FP,
+M-run5-claude,finding,F20,Pagination parameter validation gaps,,FP,
+M-run5-claude,finding,F21,Sort issues,,FP,"predicts invalid sort returns 200, key is 500"
+M-run5-claude,finding,F22,Invalid `status` filter accepted,,FP,
+M-run5-claude,finding,F23,Non-canonical ids in path treated as valid,,FP,
+M-run5-claude,finding,F24,Deleting an item from another claim,T13,TP,
+M-run5-claude,finding,F25,PATCH mass assignment,T09,TP,
+M-run5-claude,finding,F26,PATCH validation gaps,,FP,
+M-run5-claude,finding,F27,`updated_at` not maintained correctly,,FP,"judgement: updated_at title; ""changed by re-pay"" is a minor hedge, title does not commit to T11"
+M-run5-claude,finding,F28,POST /claims validation gaps,,FP,
+M-run5-claude,finding,F29,Description length counted wrongly,,FP,
+M-run5-claude,finding,F30,Submit an empty claim allowed,,FP,
+M-run5-claude,finding,F31,Resubmission doesn't update `submitted_at`,,FP,predicts stale submitted_at on resubmit; key is resubmit refused
+M-run5-claude,finding,F32,Missing state checks in review,,FP,
+M-run5-claude,finding,F33,Reject comment validation,,FP,
+M-run5-claude,finding,F34,Pay from wrong status / non-idempotent repeat pay,T11,TP,
+M-run5-claude,finding,F35,Pay reference validation,,FP,
+M-run5-claude,finding,F36,Wrong status for role checks (403 vs 404 vs 409),,FP,
+M-run5-claude,finding,F37,Item/claim ids reused after delete,,FP,
+M-run5-claude,finding,F38,Totals stale after item removal / in list,T10,TP,
+M-run5-claude,finding,F39,Delete claim leaves orphaned items or allows non-draft deletion,,FP,
+M-run5-claude,finding,F40,Auth header parsing,,FP,
+M-run5-claude,finding,F41,Login validation errors,,FP,
+M-run5-claude,finding,F42,Body parsing errors not mapped correctly,,FP,
+M-run5-claude,finding,F43,405 / routing issues,,FP,
+M-run5-claude,finding,F44,Currency change on claim with items not handled / allowed in wrong state,,FP,

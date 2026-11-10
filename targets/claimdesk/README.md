@@ -6,7 +6,7 @@ A small team-expense-claims API (Node 18+, no dependencies, in-memory, seeded on
 - **The spec:** a realistic domain with roles, a state machine, money and dates; 12–15 realistic bugs across common classes (validation, boundaries, state machine, authorization, arithmetic, dates, partial update, consistency between views, idempotency, error handling); two docs defects; at least four bugs that only show after several requests.
 - **The result:** 15 planted items, including the 2 docs defects. A sealed verifier reproduced all 15 on a fresh start, and 91 happy-path checks passed.
 
-**The answer key is sealed until scoring.** Its SHA-256 is in [`answer-key.sha256`](answer-key.sha256), committed before any batch ran on this target. When the key is published after scoring, anyone can check that it wasn't changed after the results were in.
+**The answer key was sealed until scoring.** Its SHA-256 is in [`answer-key.sha256`](answer-key.sha256), committed before batch-2 ran. Since scoring finished, the key is published at [`scoring/claimdesk/answer-key.md`](../../scoring/claimdesk/answer-key.md). Check it against the commitment with `shasum -a 256 scoring/claimdesk/answer-key.md`, and replay it with `scoring/claimdesk/verify-key.py <port>` on a fresh server.
 
 **Spoilers:** `server.js` contains the bugs. If you want to explore claimdesk yourself, read only `api.md` and run the server with `start.sh <port>`.
 

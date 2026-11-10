@@ -1,0 +1,519 @@
+# Key-item mapping for batch-2 (target claimdesk, key in scoring/claimdesk/answer-key.md, ids T01-T15).
+# Scored BLIND to the arm: a scorer agent matched every item of scripts/blind-sheet.py's sheet (runs under random
+# codes, Findings and Questions only) against the sealed key, without knowing which arm wrote what. Its raw file is
+# scoring/claimdesk/blind-scorer-1.txt; a second blind scorer re-scored a random 100 items (blind-scorer-2.txt) and
+# agreed on 96. Two disagreements changed nothing (questions repeating a finding of the same run); two were settled
+# by the batch-1 rules before unblinding and are marked "adjudicated". No new problems were confirmed beyond T01-T15.
+# Codes were translated to runs with scoring/claimdesk/blind-codes-batch-2.txt after scoring was final.
+# Format as map-batch-1.txt: <run> <item> <keys|-|FP> [| note].
+B-run5 F1 T09
+B-run5 F2 T11
+B-run5 F3 T03
+B-run5 F4 T05
+B-run5 F5 T04
+B-run5 F6 T10
+B-run5 F7 T15
+B-run5 F8 T01
+B-run5 F9 T07 | title "isn't enforced" means the daily limit; body shows per-item check only
+B-run5 F10 T08
+B-run5 F11 T14
+B-run5 Q1 T09 | describes claim set to paid via PATCH (T09 state); DUP of F1
+B-run5 Q2 T05 | restates carol's cross-team reject (status code missing); DUP of F4
+B-run5 Q3 - | untested single-item case
+B-run5 Q4 T11 | updated_at moved on repeat pay = "changes nothing" violated; DUP of F2
+B-run5 Q5 - | untested limits
+C-run5 F1 T09
+C-run5 F2 T11
+C-run5 F3 T05
+C-run5 F4 T04
+C-run5 F5 T06
+C-run5 F6 T07
+C-run5 F7 T08
+C-run5 F8 T15
+C-run5 F9 T14
+C-run5 F10 T02
+C-run5 F11 T12
+C-run5 Q1 - | untested PATCH fields
+C-run5 Q2 - | asks about payment record internals, no new observation
+C-run5 Q3 - | design question
+C-run5 Q4 - | untested
+C-run5 Q5 - | cause speculation for F5
+C-run5 Q6 T11 | payment_reference overwritten with null on repeat pay; DUP of F2
+D-run3 F1 T09
+D-run3 F2 T13
+D-run3 F3 T05
+D-run3 F4 T11
+D-run3 F5 T07
+D-run3 F6 T01
+D-run3 F7 T08
+D-run3 F8 FP | does not reproduce: 199- and 200-char descriptions return 201 on a fresh server (agent's string was likely longer)
+D-run3 F9 T15
+D-run3 F10 T14
+D-run3 F11 T10 | stale list total after T13 delete; scoring note credits T10 when stale total is described
+D-run3 Q1 - | design question (zero-total submit follows from T01)
+D-run3 Q2 T11 | reference null after repeat pay on seed claim 2 (seed had a reference); DUP
+D-run3 Q3 - | misread: seed has 17 items, no gap
+D-run3 Q4 - | documented behaviour / untested
+D-run3 Q5 - | about F8 boundary
+B-run2 F1 T09
+B-run2 F2 T05
+B-run2 F3 T11
+B-run2 F4 T03
+B-run2 F5 T01
+B-run2 F6 T07
+B-run2 F7 T08
+B-run2 F8 T10
+B-run2 F9 T15
+B-run2 F10 T14
+B-run2 F11 T02
+B-run2 Q1 - | untested extension
+B-run2 Q2 T05 | notes team check does not stop other-team managers; DUP of F2
+B-run2 Q3 - | untested
+B-run2 Q4 - | untested
+B-run2 Q5 - | untested
+C-run2 F1 T09
+C-run2 F2 T05
+C-run2 F3 T11
+C-run2 F4 T13
+C-run2 F5 T07
+C-run2 F6 T01
+C-run2 F7 T08
+C-run2 F8 T15
+C-run2 F9 T14
+C-run2 Q1 - | victim updated_at unchanged: symptom of T13, not a separate key item
+C-run2 Q2 - | untested prediction
+C-run2 Q3 - | untested
+C-run2 Q4 - | untested
+M-run4 F1 T05 | prediction: commits to 200 on other-team review
+M-run4 F2 FP | prediction: general draft visibility for managers/finance (no owner filter named); not the key's behaviour
+M-run4 F3 T04
+M-run4 F4 T13
+M-run4 F5 T11
+M-run4 F6 FP
+M-run4 F7 FP
+M-run4 F8 FP | float-sum total (0.30000000000000004), not T06 truncation
+M-run4 F9 FP | predicts valid amounts rejected, not stored one cent low
+M-run4 F10 T01 | judgement: title "amount boundary off-by-one"; hedge names amount 0 accepted
+M-run4 F11 FP
+M-run4 F12 T08 | hedge includes earliest date rejected
+M-run4 F13 FP
+M-run4 F14 FP
+M-run4 F15 T07 | hedge includes "only looks at the new item, not the sum per date"
+M-run4 F16 T07 | two 40.00 meals in POST /claims accepted = key repro; DUP of F15
+M-run4 F17 FP
+M-run4 F18 FP
+M-run4 F19 FP
+M-run4 F20 FP
+M-run4 F21 T09
+M-run4 F22 FP
+M-run4 F23 FP
+M-run4 F24 FP
+M-run4 F25 FP
+M-run4 F26 FP
+M-run4 F27 FP
+M-run4 F28 FP
+M-run4 F29 FP
+M-run4 F30 FP
+M-run4 F31 T10 | stale list total after item deletion
+M-run4 F32 T02
+M-run4 F33 FP
+M-run4 F34 FP
+M-run4 F35 FP | lexicographic/tie sort, not the key's behaviour
+M-run4 F36 T15 | hedge includes item descriptions not searched
+M-run4 F37 FP | predicts sort=foo ignored (200), key is 500
+M-run4 F38 FP
+M-run4 F39 FP
+M-run4 F40 FP
+M-run4 F41 FP
+M-run4 F42 FP
+M-run4 F43 FP
+M-run4 F44 FP
+M-run4 F45 FP
+M-run4 F46 FP
+M-run5 F1 FP | float-sum total, not T06 truncation
+M-run5 F2 FP | predicts rejection of valid amounts, not one cent low
+M-run5 F3 FP
+M-run5 F4 T01 | title names amount 0 accepted
+M-run5 F5 T08
+M-run5 F6 FP
+M-run5 F7 FP
+M-run5 F8 FP
+M-run5 F9 T07 | two 40.00 meals on one date in POST /claims accepted = key repro
+M-run5 F10 FP | wrong-scope variants (across dates/claims/categories), not per-item-only
+M-run5 F11 FP
+M-run5 F12 FP
+M-run5 F13 T05 | hedge includes 200 on other-team review
+M-run5 F14 FP | draft leak via status filter/GET/403, not via owner filter
+M-run5 F15 FP
+M-run5 F16 T04
+M-run5 F17 T15 | hedge includes item-description-only match failing
+M-run5 F18 T02
+M-run5 F19 FP
+M-run5 F20 FP
+M-run5 F21 FP | predicts invalid sort returns 200, key is 500
+M-run5 F22 FP
+M-run5 F23 FP
+M-run5 F24 T13
+M-run5 F25 T09
+M-run5 F26 FP
+M-run5 F27 FP | judgement: updated_at title; "changed by re-pay" is a minor hedge, title does not commit to T11
+M-run5 F28 FP
+M-run5 F29 FP
+M-run5 F30 FP
+M-run5 F31 FP | predicts stale submitted_at on resubmit; key is resubmit refused
+M-run5 F32 FP
+M-run5 F33 FP
+M-run5 F34 T11
+M-run5 F35 FP
+M-run5 F36 FP
+M-run5 F37 FP
+M-run5 F38 T10
+M-run5 F39 FP
+M-run5 F40 FP
+M-run5 F41 FP
+M-run5 F42 FP
+M-run5 F43 FP
+M-run5 F44 FP
+A-run5 F1 T05
+A-run5 F2 T09
+A-run5 F3 T13
+A-run5 F4 T11
+A-run5 F5 T03
+A-run5 F6 T07
+A-run5 F7 T01
+A-run5 F8 T15
+A-run5 F9 T08
+A-run5 F10 T14
+A-run5 F11 T02 | body also shows default per_page 10 (T14), already F10
+A-run5 Q1 - | untested extension
+A-run5 Q2 - | untested PATCH fields
+A-run5 Q3 - | untested extension
+A-run5 Q4 - | untested list
+A-run2 F1 T09
+A-run2 F2 T05
+A-run2 F3 T11
+A-run2 F4 T13 | item moved out of another (own) claim incl. approved one; item not in path claim
+A-run2 F5 T03
+A-run2 F6 T07
+A-run2 F7 T08
+A-run2 F8 T15
+A-run2 F9 T14
+A-run2 F10 T02
+A-run2 Q1 - | victim updated_at unchanged: symptom of T13
+A-run2 Q2 T09 | self-approved claim paid without review = T09 skip-review; DUP
+A-run2 Q3 - | untested
+A-run2 Q4 - | correct behaviour noted
+B-run4 F1 T09
+B-run4 F2 T03
+B-run4 F3 T11
+B-run4 F4 T10
+B-run4 F5 T06
+B-run4 F6 T01
+B-run4 F7 T07
+B-run4 F8 T08
+B-run4 F9 T05
+B-run4 F10 T14
+B-run4 Q1 T10 | amount_paid 61.16 > total 41.18 after removal = T10 payment drift; DUP of F4
+B-run4 Q2 T09 | claim set to paid via PATCH; DUP
+B-run4 Q3 T05 | notes other-team manager can review; DUP of F9
+B-run4 Q4 - | untested
+C-run3 F1 T05
+C-run3 F2 T11
+C-run3 F3 T13
+C-run3 F4 T03
+C-run3 F5 T07
+C-run3 F6 T08
+C-run3 F7 T10
+C-run3 F8 T15
+C-run3 F9 T12
+C-run3 F10 T14
+C-run3 Q1 T11 | reference null after repeat pay; DUP
+C-run3 Q2 - | untested extension
+C-run3 Q3 - | untested extension
+C-run3 Q4 - | seed ids, unverified
+D-run2 F1 T05
+D-run2 F2 T11
+D-run2 F3 T09
+D-run2 F4 T13
+D-run2 F5 T06
+D-run2 F6 T07
+D-run2 F7 T08
+D-run2 F8 T10
+D-run2 F9 T15
+D-run2 F10 T14
+D-run2 Q1 T03 | observed once: rejected claim resubmit 409 (noticed)
+D-run2 Q2 - | victim updated_at: symptom of T13
+D-run2 Q3 T11 | reference null after repeat pay; DUP
+D-run2 Q4 - | untested
+M-run1 F1 FP | float-sum total, not T06
+M-run1 F2 FP | predicts rejection of valid amounts or acceptance of 3 decimals
+M-run1 F3 T01 | title names the 0 boundary; hedge includes amount 0 accepted
+M-run1 F4 FP
+M-run1 F5 T08
+M-run1 F6 FP
+M-run1 F7 T07 | hedge includes single-item-only check (two 40.00 meals same day accepted)
+M-run1 F8 FP
+M-run1 F9 FP
+M-run1 F10 FP
+M-run1 F11 T13
+M-run1 F12 T05
+M-run1 F13 T04 | judgement: hedge names "owner=alice filter bypasses visibility", which is how drafts reach managers/finance
+M-run1 F14 FP
+M-run1 F15 FP
+M-run1 F16 FP
+M-run1 F17 T11
+M-run1 F18 FP
+M-run1 F19 FP
+M-run1 F20 FP
+M-run1 F21 FP
+M-run1 F22 FP
+M-run1 F23 T09
+M-run1 F24 FP
+M-run1 F25 FP
+M-run1 F26 T02
+M-run1 F27 FP
+M-run1 F28 FP
+M-run1 F29 T15
+M-run1 F30 FP | predicts sort=foo ignored, key is 500
+M-run1 F31 FP
+M-run1 F32 FP
+M-run1 F33 FP
+M-run1 F34 FP
+M-run1 F35 FP
+M-run1 F36 FP
+M-run1 F37 FP
+M-run1 F38 FP
+M-run1 F39 T04 | DUP of F13
+M-run3 F1 FP | float-sum total, not T06
+M-run3 F2 FP | predicts rejection of valid amounts
+M-run3 F3 T01 | hedge includes 0 accepted
+M-run3 F4 FP
+M-run3 F5 FP | boundary at exactly 60.00, not the per-day sum
+M-run3 F6 T07
+M-run3 F7 T07 | "only the new item": 40 + 30 same date accepted; DUP of F6
+M-run3 F8 T08
+M-run3 F9 FP
+M-run3 F10 FP
+M-run3 F11 FP
+M-run3 F12 FP
+M-run3 F13 FP
+M-run3 F14 FP
+M-run3 F15 FP
+M-run3 F16 FP
+M-run3 F17 T05
+M-run3 F18 FP
+M-run3 F19 T04
+M-run3 F20 FP | predicts sort=title silently defaults, key is 500
+M-run3 F21 T02 | hedge includes next_page non-null on exact last page
+M-run3 F22 FP
+M-run3 F23 T15
+M-run3 F24 T09
+M-run3 F25 FP
+M-run3 F26 FP | direct edits in wrong state, not cross-claim delete
+M-run3 F27 FP
+M-run3 F28 FP
+M-run3 F29 FP
+M-run3 F30 T10
+M-run3 F31 T13
+M-run3 F32 FP
+M-run3 F33 FP
+M-run3 F34 FP
+M-run3 F35 FP
+M-run3 F36 FP
+M-run3 F37 FP
+M-run3 F38 FP
+M-run3 F39 T11
+M-run3 F40 FP
+M-run3 F41 FP
+M-run3 F42 FP
+M-run3 F43 FP
+M-run3 F44 FP
+M-run3 F45 FP
+M-run3 F46 FP
+M-run3 F47 FP
+M-run3 F48 FP
+M-run3 F49 FP
+M-run3 F50 FP
+C-run4 F1 T05
+C-run4 F2 T13
+C-run4 F3 T09
+C-run4 F4 T11
+C-run4 F5 T03
+C-run4 F6 T07
+C-run4 F7 T08
+C-run4 F8 T10 | stale list total after T13 removals; describes stale total
+C-run4 F9 T14
+C-run4 Q1 T02 | observed once: total_count 10, per_page 10, next_page 2, page 2 empty (noticed)
+C-run4 Q2 - | path claim updated_at bumped: symptom of T13
+C-run4 Q3 - | 409 before 400 is quirk Q19
+C-run4 Q4 - | untested
+D-run1 F1 T13
+D-run1 F2 T09
+D-run1 F3 T05
+D-run1 F4 T11
+D-run1 F5 T04
+D-run1 F6 T03
+D-run1 F7 T07
+D-run1 F8 T08
+D-run1 F9 T15
+D-run1 F10 T02
+D-run1 F11 T14
+D-run1 Q1 T09 | pay on self-approved claim (status code cut); DUP of F2
+D-run1 Q2 - | victim updated_at: symptom of T13
+D-run1 Q3 - | untested
+D-run1 Q4 - | untested; 409 is quirk Q19
+A-run3 F1 T09
+A-run3 F2 T11
+A-run3 F3 T05
+A-run3 F4 T13
+A-run3 F5 T04
+A-run3 F6 T03
+A-run3 F7 T07
+A-run3 F8 T01
+A-run3 F9 T08
+A-run3 F10 T15
+A-run3 F11 T14
+A-run3 F12 T12
+A-run3 Q1 - | victim updated_at: symptom of T13
+A-run3 Q2 - | untested
+A-run3 Q3 - | design question about precedence
+B-run1 F1 T09
+B-run1 F2 T11
+B-run1 F3 T05
+B-run1 F4 T13
+B-run1 F5 T03
+B-run1 F6 T10
+B-run1 F7 T15
+B-run1 F8 T02
+B-run1 F9 T08
+B-run1 F10 T07
+B-run1 F11 T01
+B-run1 F12 T14
+B-run1 Q1 - | victim updated_at: symptom of T13
+B-run1 Q2 T09 | claim set to paid via PATCH with null payment fields; DUP
+B-run1 Q3 - | untested
+B-run1 Q4 - | untested
+B-run1 Q5 - | untested extension
+A-run4 F1 T05
+A-run4 F2 T09
+A-run4 F3 T11
+A-run4 F4 T13
+A-run4 F5 T04
+A-run4 F6 T07
+A-run4 F7 T01
+A-run4 F8 T08
+A-run4 F9 T15
+A-run4 F10 T14
+A-run4 Q1 - | victim updated_at: symptom of T13
+A-run4 Q2 T11;T13 | judgement: amount_paid != total here comes from double pay (T11) and post-payment item deletion (T13), not T10's stale payment; DUP
+A-run4 Q3 - | untested
+D-run4 F1 T05
+D-run4 F2 T11
+D-run4 F3 T09
+D-run4 F4 T13
+D-run4 F5 T07
+D-run4 F6 T10
+D-run4 F7 T03
+D-run4 F8 T08
+D-run4 F9 T02
+D-run4 F10 T14
+D-run4 Q1 - | cause speculation about F7
+D-run4 Q2 - | victim updated_at: symptom of T13
+D-run4 Q3 T11 | reference null after repeat pay on seed claim 2; DUP
+D-run4 Q4 T09 | paid-via-PATCH claim with null amount_paid; DUP
+D-run4 Q5 - | untested
+D-run5 F1 T11
+D-run5 F2 T09
+D-run5 F3 T13
+D-run5 F4 T05
+D-run5 F5 T03
+D-run5 F6 T07
+D-run5 F7 T06
+D-run5 F8 T01
+D-run5 F9 T08
+D-run5 F10 T10
+D-run5 F11 T02
+D-run5 F12 T14
+D-run5 F13 T15
+D-run5 Q1 - | docs port vs run port: run setup, not a defect
+D-run5 Q2 - | victim updated_at: symptom of T13
+D-run5 Q3 - | untested
+D-run5 Q4 T11 | repeat pay with no body cleared reference; DUP
+D-run5 Q5 - | misread: seed has 17 items, no gap
+B-run3 F1 T11
+B-run3 F2 T05
+B-run3 F3 T03
+B-run3 F4 T10
+B-run3 F5 T07
+B-run3 F6 T01
+B-run3 F7 T15
+B-run3 F8 T08
+B-run3 F9 T14
+B-run3 Q1 T05 | restates cross-team approvals (status code cut); DUP
+B-run3 Q2 - | untested
+B-run3 Q3 - | untested
+B-run3 Q4 - | untested
+B-run3 Q5 T11 | paid_at moves on re-pay; DUP
+A-run1 F1 T13
+A-run1 F2 T05
+A-run1 F3 T11
+A-run1 F4 T07
+A-run1 F5 T06
+A-run1 F6 T08
+A-run1 F7 T15
+A-run1 F8 T14
+A-run1 Q1 - | untested
+A-run1 Q2 - | untested extension
+A-run1 Q3 - | untested
+A-run1 Q4 - | untested
+M-run2 F1 FP | float-sum total, not T06
+M-run2 F2 FP | predicts rejection of valid amounts
+M-run2 F3 T01 | title names "0 / negative accepted"
+M-run2 F4 FP
+M-run2 F5 T08
+M-run2 F6 FP
+M-run2 F7 T07 | hedge includes meals not summed across items in one POST /claims
+M-run2 F8 FP
+M-run2 F9 FP
+M-run2 F10 T05
+M-run2 F11 FP | draft visibility without owner filter
+M-run2 F12 FP
+M-run2 F13 FP
+M-run2 F14 FP
+M-run2 F15 T11
+M-run2 F16 T10 | judgement: title "amount_paid not equal to total or stale"; hedge includes computed from stale data
+M-run2 F17 FP
+M-run2 F18 FP
+M-run2 F19 FP
+M-run2 F20 FP
+M-run2 F21 FP
+M-run2 F22 T09
+M-run2 F23 FP
+M-run2 F24 FP
+M-run2 F25 T13
+M-run2 F26 FP
+M-run2 F27 FP
+M-run2 F28 FP | prediction titled "Pagination errors" commits to no outcome (second scorer; adjudicated by the batch-1 M rule)
+M-run2 F29 FP
+M-run2 F30 T15
+M-run2 F31 T04
+M-run2 F32 FP
+M-run2 F33 FP
+M-run2 F34 FP
+M-run2 F35 FP
+M-run2 F36 FP
+M-run2 F37 FP
+M-run2 F38 FP
+M-run2 F39 FP
+M-run2 F40 FP
+C-run1 F1 T05
+C-run1 F2 T09
+C-run1 F3 T11
+C-run1 F4 T04
+C-run1 F5 T07
+C-run1 F6 T15
+C-run1 F7 T08
+C-run1 F8 T14
+C-run1 Q1 T03 | observed once: rejected claim resubmit 409 (noticed)
+C-run1 Q2 T14 | observed default per_page 10 in meta (second scorer; adjudicated: describes the key behaviour)
+C-run1 Q3 - | untested

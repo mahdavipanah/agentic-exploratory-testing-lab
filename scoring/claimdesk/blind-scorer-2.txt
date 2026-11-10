@@ -1,0 +1,100 @@
+R25 F8 T14 | default per_page 10
+R13 F39 T04 | prediction: owner filter bypasses visibility
+R04 F4 T03 | rejected claim cannot be resubmitted
+R21 Q3 - | untested resubmit/re-review path, blocked by T03
+R06 F9 FP | prediction: valid two-decimal amounts rejected; key stores them a cent low, not rejected
+R24 F37 FP | prediction: description trim/length, not in key
+R24 F40 FP | prediction: 204 body / charset, not in key
+R12 Q3 T11 | repeat pay of claim 2 left payment_reference null
+R14 F2 FP | prediction: two-decimal check rejects valid values; key is truncation, not rejection
+R24 F8 FP | prediction: non-atomic POST /claims, not in key
+R15 F8 T10 | list total stale after item removal (removal via T13, stale total described)
+R05 F7 T08 | day-90 date rejected
+R04 F7 T08 | day-90 date rejected
+R21 F13 T15 | q ignores item descriptions
+R05 Q2 - | untested speculation that repaying claim 2 doubles (T11 already F3)
+R07 F29 FP | prediction: description length counting, not in key
+R10 F2 T03 | rejected claim cannot be resubmitted
+R14 F42 FP | prediction: pay without body fails, not in key
+R07 F30 FP | prediction: empty claim submittable, not in key (Q21)
+R20 Q4 - | untested downstream effect of T09 (already F3)
+R21 F6 T07 | meals limit per item, not per day
+R02 F10 T02 | next_page non-null on exactly full last page
+R20 Q5 - | untested cross-team variants
+R18 F3 T05 | cross-team manager review
+R07 F18 T02 | prediction: next_page wrong on exact last page
+R11 Q1 T11 | repeat pay accumulates and wipes payment_reference
+R24 F28 FP | prediction: generic "pagination errors" title; T02 is one of ~6 outcomes in body only
+R13 F12 T05 | prediction: manager reviews other team's claims
+R12 F1 T05 | cross-team manager review of invisible claims
+R14 F3 T01 | prediction: amount boundaries wrong, hedge includes 0 accepted
+R02 F9 T14 | default per_page 10
+R14 F46 FP | prediction: malformed bodies cause 500, not in key
+R07 F15 FP | prediction: GET of other employee's claim, not in key
+R22 Q4 - | untested: whether zero-total claim can be submitted/paid
+R07 F42 FP | prediction: body parsing errors, not in key
+R07 F41 FP | prediction: login validation, not in key
+R24 F20 FP | prediction: submit with zero items, not in key (Q21)
+R03 Q1 - | zero-total claim submittable; follow-on of T01 (F6), asks about an undocumented rule
+R21 F4 T05 | cross-team manager review
+R22 F4 T10 | list total stale after item removal, sort uses it
+R18 F10 T07 | meals limit per item, not per day
+R18 Q3 - | untested length limits; observed behaviour correct
+R07 F5 T08 | prediction: 90-day window off by one (names day 90 rejected)
+R01 F6 T10 | list total still counts deleted items
+R14 F9 FP | prediction: local time vs UTC, not in key (Q23)
+R17 F8 T01 | amount 0 accepted
+R17 F12 T12 | invalid sort returns 500
+R25 Q3 - | list of unchecked areas
+R03 F4 T11 | repeat pay doubles amount_paid, overwrites paid_at/reference
+R17 F1 T09 | PATCH sets status, self-approval then paid
+R19 F1 T05 | cross-team manager review of invisible claims
+R04 F9 T15 | q ignores item descriptions
+R24 F36 FP | prediction: trailing slash/405, not in key
+R14 F15 FP | prediction: managers see drafts via list/detail; key leak is only via owner filter
+R02 F2 T11 | repeat pay doubles amount_paid
+R24 F4 FP | prediction: string amount coercion, not in key
+R10 F8 T08 | day-90 date rejected
+R03 F1 T09 | PATCH sets status (approved, bogus)
+R07 F32 FP | prediction: review state checks missing, not in key
+R19 F5 T04 | owner filter bypasses visibility
+R22 F9 T14 | default per_page 10
+R07 F24 T13 | prediction: delete item of another claim via own claim path
+R12 Q1 T03 | observed once: rejected claim resubmit returns 409 (not in R12 findings)
+R16 F9 T15 | q ignores item descriptions
+R19 F2 T09 | PATCH sets status, then paid
+R13 F25 FP | prediction: title length/trim, not in key
+R14 F27 FP | prediction: check ordering, not in key (Q19)
+R08 Q3 - | untested extension (pay etc.) of T05, already F1
+R14 F40 FP | prediction: pay from wrong status/role, not in key
+R09 F4 T13 | delete item through a different claim's URL
+R06 F40 FP | prediction: malformed body handling, not in key
+R01 F10 T08 | day-90 date rejected
+R11 Q2 - | untested extensions of T13 plus victim updated_at side effect
+R18 F6 T10 | list total stale after item removal
+R22 Q1 T05 | evidence note on cross-team approvals (status code not captured)
+R14 F8 T08 | prediction: 90-day window off by one (names day 90 rejected)
+R07 F27 FP | prediction: updated_at maintenance, not in key
+R07 F7 FP | prediction: impossible dates accepted, not in key
+R25 Q2 T14 | default per_page 10 seen in meta only
+R18 F1 T09 | PATCH sets status (paid/approved)
+R17 F11 T14 | default per_page 10
+R06 F30 FP | prediction: updated_at not bumped, not in key
+R09 Q4 - | PUT returns 405 with Allow header, judged correct (Q31)
+R13 F9 FP | prediction: non-atomic POST /claims, not in key
+R25 F1 T05 | cross-team manager review of invisible claims
+R07 F17 T15 | prediction: q search incomplete, hedge includes item descriptions not matched
+R23 Q3 - | untested updated_at on empty PATCH (Q08)
+R13 F27 FP | prediction: page/per_page validation, not in key
+R05 F4 T13 | delete items of other users' claims through own claim path
+R09 F3 T11 | repeat pay doubles amount_paid, changes reference
+R12 F2 T11 | repeat pay doubles amount_paid
+R04 Q4 - | untested speculation that stale total affects amount_paid (T10 already F8)
+R14 F14 FP | prediction: wrong field index, not in key
+R10 Q2 - | untested downstream of PATCH-to-paid claim (T09 already F1)
+R14 F19 T04 | prediction: owner filter bypasses visibility
+R13 F33 FP | prediction: body parsing errors, not in key
+R12 F8 T10 | list totals not updated after item removal
+R02 F1 T09 | PATCH accepts status, self-approve then paid
+R04 F2 T05 | cross-team manager review of invisible claims
+R14 F35 FP | prediction: resubmit submitted_at, not in key
