@@ -15,7 +15,7 @@ One target, four arms. The arms differ only in the mission the agent gets:
 | A | None: "Find bugs in this API." | [`arms/A-baseline.md`](arms/A-baseline.md) |
 | B | Four charters written by the experimenter from the docs, each with a tour | [`arms/B-human-charters.md`](arms/B-human-charters.md) |
 | C | The agent lists risks, writes its own charters, then explores them | [`arms/C-agent-charters.md`](arms/C-agent-charters.md) |
-| D | The [exploratory-testing skill](skills/exploratory-testing/) (v0), written from the pilot's lessons | [`arms/D-skill.md`](arms/D-skill.md) |
+| D | The [exploratory-testing skill](skills/exploratory-testing/), written from the pilot's lessons (batch-1 ran v0.1; v0.2 adds batch-1's lessons) | [`arms/D-skill.md`](arms/D-skill.md) |
 | M | Control, not an exploration: the docs only, no API access, "predict the bugs" | [`arms/M-memory.md`](arms/M-memory.md) |
 
 The rest is the same in every arm ([`arms/shared-rules.md`](arms/shared-rules.md)):
@@ -52,7 +52,7 @@ Full write-up: [`results/batch-1/summary.md`](results/batch-1/summary.md). One h
 
 **Pilot (earlier the same day):** one run per arm, isolated by instruction only. Rescored against 39 items: A 23%, B 46%, C 51%. With one run, C looked at least as good as B. Five runs show C is the least reliable. See [`results/pilot-2026-11-09/summary.md`](results/pilot-2026-11-09/summary.md). Lessons for the skill: [`skill-notes.md`](skill-notes.md).
 
-**Next:** skill v0.2 from batch-1's lessons, then a target the skill has never seen.
+**Next:** skill v0.2 (done: see [`skill-notes.md`](skill-notes.md)) on a target the skill has never seen. Batch-1 used v0.1, tagged [`batch-1`](https://github.com/mahdavipanah/agentic-exploratory-testing-lab/tree/batch-1); each run's `prompt.md` also holds the exact skill text it got.
 
 ## The skill
 

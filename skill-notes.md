@@ -65,3 +65,15 @@ From `results/batch-1/summary.md` (5 isolated runs per arm):
 
 - **A check that passed by luck, again.** The smoke test passed because its agent happened to retry a refused write with a different spelling of the same path. In the batch, 11 of 25 agents didn't retry. The fixed smoke test checks the outcome that matters: the agent saved the report itself.
 - **Same thing, two names.** On macOS, `/var/...` and `/private/var/...` are the same folder, but the permission check sees only one of them. For an explorer: when something is refused or missing, check whether you used the name the system resolves to, not just a name that points there.
+
+## Skill v0.2 (10 Nov 2026)
+
+Batch-1's lessons, added to `SKILL.md`. Examples are kept generic, so nothing mirrors Restful-booker's answer key.
+
+- **"When to stop"**, a new subsection. Use the budget: if charters finish early, add one for the least certain risk or the thinnest area. Stop only when the budget is spent or every top risk has an evidenced answer. Running out of ideas means switching tours, not stopping. (From C-run1.)
+- **"Nothing is correct after valid input alone"** replaces the boundary bullet. Test the boundary value itself, both sides of it, the opposite direction and an invalid value before calling anything correct. (From C-run1's filters.)
+- **"Look at the whole response"**, a new bullet: status, headers and body. (Several of the bugs only exploring found were an error text with 200 and a mislabelled format.)
+- **Memory guides, evidence decides**, added to the Evidence section: if you recognise the system, use that to choose probes, never as evidence. (From arm M: 35% of its predictions matched nothing.)
+- **Your own mistakes** now name typos, stale tokens and different spellings of the same path. (From the harness's `/var` vs `/private/var` bug.)
+
+Unchanged: the rules behind D's distinct finds (server-owned fields on every write path, read-back, wrong docs still count).

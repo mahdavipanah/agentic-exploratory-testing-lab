@@ -3,7 +3,7 @@ name: exploratory-testing
 description: Explores a running system (HTTP API, web app, CLI or library) to find the bugs scripted tests miss. Lists risks, writes charters, explores them with tours, keeps evidence for every claim, and reports bugs, behaviour that needs a decision, and unconfirmed suspicions. Use when asked to explore, bug-hunt, do exploratory testing, or try out or sanity-check a feature, API or app, including code you just wrote.
 license: MIT
 metadata:
-  version: "0.1"
+  version: "0.2"
   source: "https://github.com/mahdavipanah/agentic-exploratory-testing-lab"
 ---
 
@@ -30,7 +30,7 @@ Copy this checklist into your notes and keep it updated:
 - [ ] 1. Environment checked and recorded
 - [ ] 2. Risks listed and ranked
 - [ ] 3. Charters written, each with a tour and a budget
-- [ ] 4. Charters explored
+- [ ] 4. Charters explored, until the budget is spent or every top risk has an answer
 - [ ] 5. Every finding reproduced, with evidence
 - [ ] 6. Report written
 ```
@@ -55,15 +55,22 @@ Work through the charters in order and keep a running count of the budget. While
 
 - **Follow the surprise.** Investigate anything odd before moving on. If you find a new risk area, add a charter and say why.
 - **Repeat each probe on every path that does the same job.** A field that create ignores may be accepted by update. Validation on one endpoint says nothing about another. Check create, full update, partial update, delete, bulk and import, in every input format.
-- **Test both sides of every boundary**, and the boundary itself.
+- **Nothing is correct after valid input alone.** Before calling a filter, rule or check correct, test the boundary value itself, both sides of it, the opposite direction, and an invalid value.
 - **Read back after every write**, especially an odd one, in every representation the system offers. Some damage only shows later.
+- **Look at the whole response:** status, headers and body. An error message with a success status, or one format labelled as another, only shows if you look.
 - **Send what well-behaved clients don't:** missing, extra, null, empty, wrong-type, huge, negative, malformed, duplicate and out-of-order values. Include fields the docs don't list, such as ids and other server-owned fields.
 - **Judge with several oracles, not just the docs.** See [references/oracles.md](references/oracles.md). Behaviour that matches wrong docs is still a finding.
-- **Separate your mistakes from the system's.** When something fails, check your own request before blaming the system, and the system before blaming your request.
+- **Separate your mistakes from the system's.** When something fails, check your own request before blaming the system (a typo, a stale token, a different spelling of the same path), and the system before blaming your request.
+
+### When to stop
+
+Use the budget. If your charters finish with budget left, write one more charter for the risk you are least sure about or the area you covered least, and keep going. Stop when the budget is spent, or when every top risk has an answer backed by evidence. "I ran out of ideas" is a reason to switch tours, not to stop.
 
 ### 5. Evidence
 
 Every claim needs the exact command or steps you ran and the output you saw. Reproduce each finding at least once before reporting it. Never report what you expect would happen.
+
+If you recognise the system (a well-known product, a familiar framework or demo app), use what you remember to choose what to probe, never as evidence. Memory of a system is often wrong in the details; report only what you observed in this session.
 
 ### 6. Report
 
