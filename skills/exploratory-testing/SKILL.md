@@ -3,7 +3,7 @@ name: exploratory-testing
 description: Explores a running system (HTTP API, web app, CLI or library) to find the bugs scripted tests miss. Lists risks, writes charters, explores them with tours, keeps evidence for every claim, and reports bugs, behaviour that needs a decision, and unconfirmed suspicions. Use when asked to explore, bug-hunt, do exploratory testing, or try out or sanity-check a feature, API or app, including code you just wrote.
 license: MIT
 metadata:
-  version: "0.3"
+  version: "0.4"
   source: "https://github.com/mahdavipanah/exploratory-testing-skill"
 ---
 
@@ -19,6 +19,7 @@ Establish these from the request, or ask once:
 - **Sources:** docs, specs, tickets, and code if you're allowed to use it. Default to black box: the running system and its docs.
 - **Budget:** requests, commands or minutes. Default: 80 requests.
 - **Scope:** what is in and what is out.
+- **Accounts and data:** a login for each role that can touch the same data, and data in the states you'll need (none, typical, a lot), or a way to create them.
 
 Then **check the environment** with a probe whose answer would differ if it were not what you think: create something and read it back, or check a version or seed state. A health check alone can pass for the wrong reason. Record versions, configuration and timezone in your notes.
 
@@ -47,6 +48,11 @@ Then list where the system is most likely to be wrong and which failures would h
 
 Start from risks, not from the list of endpoints or screens. A coverage list ends when the list does; a risk keeps you digging until you know.
 
+If you were asked to check a change or a bug report, let it set the first risks:
+
+- **A change:** find out what changed (release notes, the ticket, or the diff if you may read code). Rank the changed behaviour and everything that uses it first, and check that what worked before still works.
+- **A bug report**, especially a vague one ("sometimes the total is wrong"): reproduce it first. Then vary one condition at a time until you know what triggers it, and cut the steps down to the fewest that still show it. Then look for the same fault on every other path that does the same job.
+
 ### 3. Write charters
 
 Write 3 to 5 charters from the top risks, one line each:
@@ -59,7 +65,7 @@ Pick tours from [references/tours.md](references/tours.md). Write the charters d
 
 Work through the charters in order and keep a running count of the budget. While you explore:
 
-- **Follow the surprise.** Investigate anything odd before moving on. If you find a new risk area, or keep being tempted off-charter, add a charter and say why.
+- **Follow the surprise.** Investigate anything odd before moving on. Once it reproduces, vary one thing at a time (data, user, path, format) to find how far it reaches. If you find a new risk area, or keep being tempted off-charter, add a charter and say why.
 - **Vary on purpose, not by habit.** Use the heuristics in [references/heuristics.md](references/heuristics.md): zero, one, many; some, none, all; beginning, middle, end; too small, too big; other formats. Avoid the test values and the create-read-update-delete order you'd use by default.
 - **Follow the data.** After every change, look for the entity everywhere it appears: lists, searches, filters, totals, related records, other users' views.
 - **Walk the state table.** Try each event in each state, especially the ones the docs don't mention, and every way into and out of a state. Act as each role that can touch the same data.
@@ -68,6 +74,7 @@ Work through the charters in order and keep a running count of the budget. While
 - **Read back after every write**, especially an odd one, in every representation the system offers. Some damage only shows later. Ask the deeper question: not "did it succeed?" but "can I use what it produced?"
 - **Look at the whole response:** status, headers and body. An error message with a success status, or one format labelled as another, only shows if you look.
 - **Send what well-behaved clients don't:** missing, extra, null, empty, wrong-type, huge, negative, malformed, duplicate and out-of-order values. Include fields the docs don't list, such as ids and other server-owned fields.
+- **In a browser, do what people do to browsers:** go back and forward, refresh during a save, open the same record in two tabs and change both, double-click submit, and go straight to the URL of a later step. Keep the console and network panel in view: an error the page hides is still an error. More in [references/heuristics.md](references/heuristics.md).
 - **Judge with several oracles, not just the docs.** See [references/oracles.md](references/oracles.md). Behaviour that matches wrong docs is still a finding.
 - **Separate your mistakes from the system's.** When something fails, check your own request before blaming the system (a typo, a stale token, a different spelling of the same path), and the system before blaming your request.
 
@@ -89,7 +96,7 @@ Use [references/report-template.md](references/report-template.md). Every item i
 - **Needs a decision:** confirmed behaviour that may or may not be intended, for example because the docs are unclear or conventions disagree. Report it as a finding so a human decides; don't hide it among questions.
 - **Suspicion:** seen once or inferred, not confirmed. These go under Questions.
 
-End with coverage: what each charter covered, what you saw working, what remains unknown, and how much budget you used. Report facts and evidence, not verdicts like "it's not ready": the reader decides.
+End with coverage: for each charter, whether you covered it, covered part of it or didn't reach it, and what you saw working; then what remains unknown, and how much budget you used. Report facts and evidence, not verdicts like "it's not ready": the reader decides.
 
 ## If you wrote the code yourself
 
@@ -104,7 +111,7 @@ If you can, hand the exploration to a fresh session that sees only the running s
 
 ## After the report
 
-For each confirmed bug, propose a regression test. If you own the code, fix it test-first: write a failing test, then make it pass. Keep the report as the record of what was explored.
+For each confirmed bug, propose a regression test at the lowest level that shows it: a unit test for a logic bug, an API test for a contract bug, a browser test only for a broken flow. Run it and watch it fail for the reason in the finding; a test you have never seen fail may not guard anything. If you own the code, fix it test-first: write the failing test, then make it pass. Keep the report as the record of what was explored.
 
 ## Safety
 

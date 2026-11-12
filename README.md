@@ -49,8 +49,11 @@ The agent then:
 2. Models the system before listing risks: its entities, a table of its states and events, and everything it can vary.
 3. Writes down the rules that must never break (money is never created or lost, one user never sees another's data), then ranks the risks.
 4. Writes three to five charters, each with a tour and a budget, and uses the whole budget.
-5. Follows the data after every change, tries every event in every state, repeats each probe on every path that does the same job, tests both sides of every boundary, and reads the whole response.
+5. Follows the data after every change, tries every event in every state, repeats each probe on every path that does the same job, tests both sides of every boundary, and reads the whole response. In a browser it also goes back, refreshes, opens two tabs and double-submits, with the console in view.
 6. Backs every claim with the command and its output, and reports bugs, behaviour that needs a decision, and open questions separately, with what it saw working and what is still unknown.
+7. Proposes a regression test for each bug and watches it fail before anything is fixed.
+
+Asked to check a change, it starts from what changed. Given a bug report, it reproduces and narrows it down first.
 
 The details are in [`SKILL.md`](skills/exploratory-testing/SKILL.md) and its [`references/`](skills/exploratory-testing/references/): heuristics, oracles, tours and the report template.
 
