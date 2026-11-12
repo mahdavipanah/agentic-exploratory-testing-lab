@@ -2,6 +2,21 @@
 
 Each version of the skill, and the experiment it came from. The reasoning behind every rule is in [`lab/skill-notes.md`](lab/skill-notes.md).
 
+## 0.4 (12 Nov 2026)
+
+Ideas from comparing the skill with Petr Kindlmann's [exploratory-testing skill](https://github.com/petrkindlmann/qa-skills/tree/main/skills/exploratory-testing), a session-based playbook for human testers, rewritten for an agent and in the skill's own words.
+
+- Starting from a change: find out what changed and rank it first. Starting from a bug report: reproduce, vary one condition at a time, cut the steps down, then look for the same fault on other paths.
+- Once a surprise reproduces, vary one thing at a time to find how far it reaches.
+- Accounts for each role and data in the states you'll need, settled before you start.
+- Browser moves (back, refresh, two tabs, double submit, deep links, a lost session) and the console and network panel, in a new "In a browser" section of `heuristics.md`.
+- Page edges, calendar edges, and cutting an operation off midway.
+- Two oracles from FEW HICCUPPS: explainability and the world.
+- Regression tests at the lowest level that shows the bug, and seen failing before any fix.
+- Coverage marks each charter covered, partly covered or not reached.
+
+Not tested in the lab yet. See `lab/skill-notes.md` for what overlaps the existing answer keys.
+
 ## 0.3 (10 Nov 2026)
 
 Adds ideas from Elisabeth Hendrickson's *Explore It!*, in the skill's own words, and a new [`references/heuristics.md`](skills/exploratory-testing/references/heuristics.md).

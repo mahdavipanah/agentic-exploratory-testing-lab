@@ -1,6 +1,6 @@
 # Oracles: how to tell something is wrong
 
-An oracle is a way of recognising a problem. Never rely on one alone: docs can be wrong, and behaviour that matches wrong docs is still a finding. Adapted from James Bach and Michael Bolton's HICCUPPS oracle heuristics.
+An oracle is a way of recognising a problem. Never rely on one alone: docs can be wrong, and behaviour that matches wrong docs is still a finding. Adapted from James Bach and Michael Bolton's HICCUPPS oracle heuristics, with three from Bolton's FEW HICCUPPS (familiar problems, explainability, the world).
 
 | Oracle | Ask | Examples |
 | --- | --- | --- |
@@ -14,6 +14,8 @@ An oracle is a way of recognising a problem. Never rely on one alone: docs can b
 | Comparable products | How do similar systems behave? | Every comparable tool accepts this file and this one rejects it |
 | Image | Would this embarrass the team? | A typo in a customer-facing message; secrets in a log line |
 | Familiar problems | Does it show a known bug pattern? | Off-by-one, rounding and precision loss, timezone and daylight-saving shifts, encoding and escaping, null versus empty, races and double submits, stale caches, injection, mass assignment (a client setting server-owned fields) |
+| Explainability | Can you explain why it did that? Behaviour you can't explain is a lead, even when nothing looks broken. | The same request giving different results; a value that changes when nothing touched it |
+| The world | Does it fit what is true outside the system? | An order delivered before it was placed; a person aged 200 |
 
 ## When you can't know the exact answer
 
